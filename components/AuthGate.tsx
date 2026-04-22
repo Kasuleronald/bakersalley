@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { User, AuthSession, TaxConfig } from '../types';
 import { COMPLIANCE_DEFINITIONS, TERMS_AND_CONDITIONS } from '../constants';
-import { apiClient } from '../services/apiClient';
 
 interface AuthGateProps {
   session: AuthSession;
