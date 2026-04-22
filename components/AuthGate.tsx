@@ -46,15 +46,17 @@ const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, onRegister
         return;
       }
 
-      setIsAuthenticating(true);
-      const authResult = await apiClient.login(identity, password);
-      setIsAuthenticating(false);
-      
-      if (authResult) {
-        onLogin(authResult.user);
-      } else {
-        setError("Authentication failed. Please verify credentials or server sync status.");
-      }
+     setIsAuthenticating(true);
+const matched = users.find(
+  u => u.identity === identity && u.passwordHash === password
+);
+setIsAuthenticating(false);
+
+if (matched) {
+  onLogin(matched);
+} else {
+  setError("Invalid username or password.");
+}
     } else if (view === 'Register') {
       // Granular Registration Validation
       if (!name.trim()) {
