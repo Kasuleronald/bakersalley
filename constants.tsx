@@ -54,9 +54,39 @@ export const DEPARTMENTS: DepartmentName[] = [
 ];
 
 export const INITIAL_USERS: User[] = [
-  { id: 'u-md', name: 'Dr. David Kato', identity: 'md@nissi-industries.com', passwordHash: 'md123', department: 'Administration', role: 'Managing Director', authorityLimit: 1000000000, mfaEnabled: true },
-  { id: 'u-ops', name: 'Sarah Nabukeera', identity: 'ops@nissi-industries.com', passwordHash: 'ops123', department: 'Production', role: 'Plant Manager', authorityLimit: 50000000, mfaEnabled: true },
-  { id: 'u-dummy', name: 'Dummy Company', identity: 'dummy', passwordHash: 'dummy@123', department: 'Administration', role: 'Managing Director', authorityLimit: 1000000000, mfaEnabled: false }
+  { 
+    id: 'u-md', 
+    name: 'Dr. David Kato', 
+    identity: 'md@nissi-industries.com', 
+    passwordHash: 'md123', 
+    department: 'Administration', 
+    role: 'Managing Director', 
+    authorityLimit: 1000000000, 
+    mfaEnabled: true,
+    hasConsentedToPrivacy: true
+  },
+  { 
+    id: 'u-ops', 
+    name: 'Sarah Nabukeera', 
+    identity: 'ops@nissi-industries.com', 
+    passwordHash: 'ops123', 
+    department: 'Production', 
+    role: 'Plant Manager', 
+    authorityLimit: 50000000, 
+    mfaEnabled: true,
+    hasConsentedToPrivacy: true
+  },
+  { 
+    id: 'u-dummy', 
+    name: 'Dummy Company', 
+    identity: 'dummy', 
+    passwordHash: 'dummy@123', 
+    department: 'Administration', 
+    role: 'Managing Director', 
+    authorityLimit: 1000000000, 
+    mfaEnabled: false,
+    hasConsentedToPrivacy: false
+  }
 ];
 
 export const INITIAL_EMPLOYEES: Employee[] = [
