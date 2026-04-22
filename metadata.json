@@ -1,0 +1,9 @@
+{
+  "name": "BakersAlley 3.1",
+  "description": "Industrial Bakery ERP with AI Strategic Logic.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation",
+    "microphone"
+  ]
+}
