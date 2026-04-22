@@ -192,7 +192,7 @@ const App: React.FC = () => {
       const fullState = {
         taxConfig, skus, ingredients, activities, overheads, employees,
         transactions, productionLogs, sales, customers, orders,
-        outlets, finishedGoods, outletStocks, inventoryLosses,
+        finishedGoods, outletStocks, inventoryLosses,
         requisitions, loans, invoices, forecasts, outletForecasts,
         movements, assets, suppliers, budgets, accountGroups,
         wbTickets, gatePasses, users, agents, directives,
@@ -205,7 +205,7 @@ const App: React.FC = () => {
   }, [
     taxConfig, skus, ingredients, activities, overheads, employees,
     transactions, productionLogs, sales, customers, orders,
-    outlets, finishedGoods, outletStocks, inventoryLosses,
+    finishedGoods, outletStocks, inventoryLosses,
     requisitions, loans, invoices, forecasts, outletForecasts,
     movements, assets, suppliers, budgets, accountGroups,
     wbTickets, gatePasses, users, agents, qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile
