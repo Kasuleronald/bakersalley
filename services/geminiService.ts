@@ -66,7 +66,7 @@ export const analyzeFloorProductivity = async (params: {
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -110,7 +110,7 @@ export const analyzeHistoricalCashFlow = async (params: {
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -136,7 +136,7 @@ export const predictOutletDemand = async (name: string, type: string, history: S
       Return JSON: [{ "skuId": "string", "predictedQty": number, "confidence": number, "wasteRiskAlert": "string" }]
     `;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -178,7 +178,7 @@ export const performLedgerForensicAudit = async (params: {
     `;
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -225,7 +225,7 @@ export const performRevenueForensicAudit = async (params: {
     `;
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -272,7 +272,7 @@ export const analyzeSalesProductivity = async (params: {
     `;
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -301,7 +301,7 @@ export const getMarketIntelligence = async (region: string, nation: string): Pro
     `;
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-image-preview',
       contents: prompt,
       config: { 
         tools: [{googleSearch: {}}]
@@ -326,7 +326,7 @@ export const generateGanttSchedule = async (orders: Order[], skus: SKU[], resour
     `;
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -345,7 +345,7 @@ export const generateExecutiveBoardBrief = async (context: {
       Act as the Chief Strategy Officer reporting to a Board.
       Draft a 3-paragraph executive brief based on: ${JSON.stringify(context)}
     `;
-    const response = await ai.models.generateContent({ model: 'gemini-2.0-flash', contents: prompt });
+    const response = await ai.models.generateContent({ model: 'gemini-3-flash-preview', contents: prompt });
     return response.text || null;
   });
 };
@@ -354,7 +354,7 @@ export const analyzeRiskProfile = async (data: any, userIntent?: string): Promis
   return executeWithRetry(async (ai) => {
     const prompt = `Analyze manufacturing resilience. DATA: ${JSON.stringify(data)}`;
     const response = await ai.models.generateContent({ 
-      model: 'gemini-2.0-flash', 
+      model: 'gemini-3-pro-preview', 
       contents: prompt, 
       config: { responseMimeType: "application/json" } 
     });
@@ -379,7 +379,7 @@ export const runSourcingResilienceAudit = async (ingredients: Ingredient[], supp
       }
     `;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -391,7 +391,7 @@ export const analyzeProductMix = async (data: any[], userIntent?: string): Promi
   return executeWithRetry(async (ai) => {
     const prompt = `Analyze BCG Matrix product mix. DATA: ${JSON.stringify(data)}`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -403,7 +403,7 @@ export const generateMarketingStrategy = async (skus: SKU[], sales: Sale[], budg
   return executeWithRetry(async (ai) => {
     const prompt = `Generate a marketing execution plan. Return strictly JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -415,7 +415,7 @@ export const analyzeCompetitiveStrategy = async (intent: string, skuMetrics: any
   return executeWithRetry(async (ai) => {
     const prompt = `Audit Porter's Generic Strategy. Return strictly JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -426,7 +426,7 @@ export const analyzeCompetitiveStrategy = async (intent: string, skuMetrics: any
 export const generatePersonnelFeedback = async (employee: Employee, appraisal: AppraisalRecord, goals: Goal[], userIntent?: string): Promise<string | null> => {
   return executeWithRetry(async (ai) => {
     const prompt = `Draft HR coaching feedback for ${employee.name}.`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.0-flash', contents: prompt });
+    const response = await ai.models.generateContent({ model: 'gemini-3-flash-preview', contents: prompt });
     return response.text || null;
   });
 };
@@ -435,7 +435,7 @@ export const analyzeSnOP = async (skus: SKU[], forecasts: MonthlyForecast[], tot
   return executeWithRetry(async (ai) => {
     const prompt = `Sales & Operations Equilibrium Audit. Return strictly JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -447,7 +447,7 @@ export const analyzeProcurement = async (req: Requisition, ing: Ingredient, supp
   return executeWithRetry(async (ai) => {
     const prompt = `Audit procurement requisition. Return strictly JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -458,7 +458,7 @@ export const analyzeProcurement = async (req: Requisition, ing: Ingredient, supp
 export const analyzeSustainability = async (logs: ProductionLog[], losses: InventoryLoss[], skus: SKU[], userIntent?: string): Promise<string | null> => {
   return executeWithRetry(async (ai) => {
     const prompt = `Industrial ESG and Sustainability audit.`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.0-flash', contents: prompt });
+    const response = await ai.models.generateContent({ model: 'gemini-3-pro-preview', contents: prompt });
     return response.text || null;
   });
 };
@@ -466,7 +466,7 @@ export const analyzeSustainability = async (logs: ProductionLog[], losses: Inven
 export const getIngredientScientificBrief = async (ingredientName: string): Promise<string | null> => {
   return executeWithRetry(async (ai) => {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: `Scientific brief for: ${ingredientName}.`
     });
     return response.text || null;
@@ -477,7 +477,7 @@ export const optimizeProductionSequence = async (orders: Order[], skus: SKU[], a
   return executeWithRetry(async (ai) => {
     const prompt = `Optimize production sequence. Return JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -489,7 +489,7 @@ export const generateCustomerGrowthStrategy = async (customer: Customer, history
   return executeWithRetry(async (ai) => {
     const prompt = `Generate customer growth strategy for ${customer.name}. Return JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -501,7 +501,7 @@ export const runPredictiveMaintenanceAudit = async (asset: Asset, logs: Producti
   return executeWithRetry(async (ai) => {
     const prompt = `Predictive maintenance audit for asset. Return JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -513,7 +513,7 @@ export const analyzeQualityFailure = async (log: QALog, sku: SKU): Promise<any |
   return executeWithRetry(async (ai) => {
     const prompt = `Analyze quality failure. Return JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -524,7 +524,7 @@ export const analyzeQualityFailure = async (log: QALog, sku: SKU): Promise<any |
 export const getTrendingBakeryInsights = async (query: string, location: string): Promise<any | null> => {
   return executeWithRetry(async (ai) => {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-image-preview',
       contents: `Search for trending bakery insights for "${query}" in ${location}.`,
       config: { tools: [{googleSearch: {}}] }
     });
@@ -538,7 +538,7 @@ export const optimizeInventoryProcurement = async (requirements: any[], ingredie
   return executeWithRetry(async (ai) => {
     const prompt = `Optimize inventory procurement. Return JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -550,7 +550,7 @@ export const analyzeOpportunityScore = async (lead: Lead): Promise<any | null> =
   return executeWithRetry(async (ai) => {
     const prompt = `Analyze sales opportunity. Return JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -562,7 +562,7 @@ export const generateCashStrategy = async (metrics: any, orders: Order[], invoic
   return executeWithRetry(async (ai) => {
     const prompt = `Generate cash flow strategy.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt
     });
     return response.text || null;
@@ -573,7 +573,7 @@ export const analyzeTaxPosition = async (stats: any, config: TaxConfig): Promise
   return executeWithRetry(async (ai) => {
     const prompt = `Analyze tax position.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt
     });
     return response.text || null;
@@ -584,7 +584,7 @@ export const analyzeDocumentImage = async (base64: string, docType: string): Pro
   return executeWithRetry(async (ai) => {
     const prompt = `Extract data from this ${docType} image. Return JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/jpeg', data: base64.split(',')[1] } },
@@ -601,7 +601,7 @@ export const generateIndustryBlueprint = async (description: string, nation: str
   return executeWithRetry(async (ai) => {
     const prompt = `Generate industry blueprint. Return JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -612,7 +612,7 @@ export const generateIndustryBlueprint = async (description: string, nation: str
 export const findLocalBakeryLeads = async (location: string, nation: string): Promise<any | null> => {
   return executeWithRetry(async (ai) => {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-image-preview',
       contents: `B2B bakery leads in ${location}, ${nation}.`,
       config: { tools: [{googleSearch: {}}] }
     });
@@ -631,7 +631,7 @@ export const findLocalBakeryLeads = async (location: string, nation: string): Pr
 export const scanLocalConsumerDemand = async (location: string, nation: string, items: string[]): Promise<any | null> => {
   return executeWithRetry(async (ai) => {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-image-preview',
       contents: `Consumer demand in ${location}, ${nation}.`,
       config: { tools: [{googleSearch: {}}] }
     });
@@ -651,7 +651,7 @@ export const getTroubleshootingAdvice = async (defectDescription: string, skuNam
   return executeWithRetry(async (ai) => {
     const prompt = `Troubleshooting for ${skuName}: "${defectDescription}".`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -663,7 +663,7 @@ export const analyzeWeighbridgeIntegrity = async (tickets: WeighbridgeTicket[], 
   return executeWithRetry(async (ai) => {
     const prompt = `Weighbridge audit. Return JSON.`;
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: { responseMimeType: "application/json" }
     });
@@ -686,7 +686,7 @@ export const processSmartBookkeeping = async (params: { text?: string, base64?: 
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       contents,
       config: { responseMimeType: "application/json" }
     });
