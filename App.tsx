@@ -390,7 +390,10 @@ const App: React.FC = () => {
 
 return (
   <Layout 
-    activeTab={activeTab} setActiveTab={setActiveTab} session={session} onLogout={() => setSession({ user: null, token: null })} onOpenSearch={() => setIsSearchOpen(true)} 
+    activeTab={activeTab} setActiveTab={setActiveTab} session={session} onLogout={() => {
+  localStorage.clear();
+  setSession({ user: null, token: null });
+}} onOpenSearch={() => setIsSearchOpen(true)} 
     activeCurrency={activeCurrency} setActiveCurrency={setActiveCurrency} subscriptionTier={subscriptionTier}
     activeLanguage={activeLanguage}
   >
