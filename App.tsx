@@ -18,6 +18,7 @@ import {
   INITIAL_SUPPLIER_INVOICES, DEFAULT_TAX_CONFIG, INITIAL_AGENTS, INITIAL_ACCOUNT_GROUPS, SYSTEM_CHANGELOG
 } from './constants';
 
+import AuthGate from './components/AuthGate';
 import Dashboard from './components/Dashboard';
 import RecipeBuilder from './components/RecipeBuilder';
 import StoresManager from './components/StoresManager';
@@ -46,7 +47,7 @@ import { bakeryService } from './services/bakeryService';
 import { apiClient } from './services/apiClient';
 
 const App: React.FC = () => {
-  const [session, setSession] = useState<AuthSession>({ user: INITIAL_USERS[0], token: 'fake' });
+  const [session, setSession] = useState<AuthSession>({ user: null, token: null });
   const [activeTab, setActiveTab] = useState('dashboard');
   const [activeCurrency, setActiveCurrency] = useState<CurrencyCode>('UGX');
   const [activeLanguage, setActiveLanguage] = useState<LanguageCode>('EN');
@@ -367,30 +368,43 @@ const App: React.FC = () => {
     }
   };
 
+  if (!session.user) {
   return (
-    <Layout 
-      activeTab={activeTab} setActiveTab={setActiveTab} session={session} onLogout={() => setSession({ user: null, token: null })} onOpenSearch={() => setIsSearchOpen(true)} 
-      activeCurrency={activeCurrency} setActiveCurrency={setActiveCurrency} subscriptionTier={subscriptionTier}
-      activeLanguage={activeLanguage}
-    >
-      {renderContent()}
-      <GlobalSearch 
-        isOpen={isSearchOpen} 
-        onClose={() => setIsSearchOpen(false)} 
-        skus={skus} 
-        ingredients={ingredients} 
-        onNavigate={(tab) => { setActiveTab(tab); setIsSearchOpen(false); }}
-        location={taxConfig.nation}
-      />
-      {showFeaturePortal && session.user && (
-        <FeatureUpdatePortal 
-          user={session.user} 
-          onUpdateUser={handleUpdateUser} 
-          onClose={() => setShowFeaturePortal(false)} 
-        />
-      )}
-    </Layout>
+    <AuthGate
+      session={session}
+      users={users}
+      onLogin={(user) => setSession({ user, token: 'local' })}
+      onVerifyMfa={() => {}}
+      onRegister={(newUser) => setUsers([...users, newUser])}
+      taxConfig={taxConfig}
+    />
   );
+}
+
+return (
+  <Layout 
+    activeTab={activeTab} setActiveTab={setActiveTab} session={session} onLogout={() => setSession({ user: null, token: null })} onOpenSearch={() => setIsSearchOpen(true)} 
+    activeCurrency={activeCurrency} setActiveCurrency={setActiveCurrency} subscriptionTier={subscriptionTier}
+    activeLanguage={activeLanguage}
+  >
+    {renderContent()}
+    <GlobalSearch 
+      isOpen={isSearchOpen} 
+      onClose={() => setIsSearchOpen(false)} 
+      skus={skus} 
+      ingredients={ingredients} 
+      onNavigate={(tab) => { setActiveTab(tab); setIsSearchOpen(false); }}
+      location={taxConfig.nation}
+    />
+    {showFeaturePortal && session.user && (
+      <FeatureUpdatePortal 
+        user={session.user} 
+        onUpdateUser={handleUpdateUser} 
+        onClose={() => setShowFeaturePortal(false)} 
+      />
+    )}
+  </Layout>
+);
 };
 
 export default App;
