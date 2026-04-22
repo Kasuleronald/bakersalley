@@ -373,7 +373,14 @@ const App: React.FC = () => {
     <AuthGate
       session={session}
       users={users}
-      onLogin={(user) => setSession({ user, token: 'local' })}
+      onLogin={(user) => {
+        const matched = users.find(
+          u => (u.identity === user.identity) && (u.passwordHash === user.passwordHash)
+        );
+        if (matched) {
+          setSession({ user: matched, token: 'local' });
+        }
+      }}
       onVerifyMfa={() => {}}
       onRegister={(newUser) => setUsers([...users, newUser])}
       taxConfig={taxConfig}
