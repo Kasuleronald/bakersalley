@@ -46,11 +46,13 @@ const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, onRegister
         return;
       }
 
-     setIsAuthenticating(true);
+      setIsAuthenticating(true);
+await new Promise(resolve => setTimeout(resolve, 600)); // small delay for UX
+setIsAuthenticating(false);
+
 const matched = users.find(
   u => u.identity === identity && u.passwordHash === password
 );
-setIsAuthenticating(false);
 
 if (matched) {
   onLogin(matched);
