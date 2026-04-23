@@ -1,0 +1,22 @@
+
+{
+  "name": "BakersAlley 2.0 Enterprise",
+  "short_name": "BakersAlley",
+  "description": "Enterprise Bakery ERP for Offline & Cloud Operations",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fcfaf7",
+  "theme_color": "#78350f",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3014/3014510.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3014/3014510.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

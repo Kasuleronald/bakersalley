@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import Layout from './Layout';
 import { 
@@ -47,7 +46,52 @@ import { bakeryService } from './services/bakeryService';
 import { apiClient } from './services/apiClient';
 
 const App: React.FC = () => {
-  const [session, setSession] = useState<AuthSession>({ user: null, token: null });
+
+  // ── Session: restore from localStorage on load ──────────────────────────
+  const [session, setSessionState] = useState<AuthSession>(() => {
+    try {
+      const saved = localStorage.getItem('bakersalley_session');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.user) return parsed;
+      }
+    } catch {}
+    return { user: null, token: null };
+  });
+
+  const setSession = (newSession: AuthSession) => {
+    setSessionState(newSession);
+    if (newSession.user) {
+      localStorage.setItem('bakersalley_session', JSON.stringify(newSession));
+    } else {
+      localStorage.removeItem('bakersalley_session');
+    }
+  };
+
+  // ── Inactivity logout after 5 minutes ───────────────────────────────────
+  useEffect(() => {
+    if (!session.user) return;
+
+    let inactivityTimer: ReturnType<typeof setTimeout>;
+
+    const resetTimer = () => {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        localStorage.removeItem('bakersalley_session');
+        setSessionState({ user: null, token: null });
+      }, 5 * 60 * 1000); // 5 minutes
+    };
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
+    events.forEach(e => window.addEventListener(e, resetTimer));
+    resetTimer();
+
+    return () => {
+      clearTimeout(inactivityTimer);
+      events.forEach(e => window.removeEventListener(e, resetTimer));
+    };
+  }, [session.user]);
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [activeCurrency, setActiveCurrency] = useState<CurrencyCode>('UGX');
   const [activeLanguage, setActiveLanguage] = useState<LanguageCode>('EN');
@@ -157,9 +201,9 @@ const App: React.FC = () => {
   // Detect New Features for Registered Users
   useEffect(() => {
     if (session.user) {
-        const userSeen = session.user.seenFeatures || [];
-        const hasNew = SYSTEM_CHANGELOG.some(f => !userSeen.includes(f.id));
-        if (hasNew) setShowFeaturePortal(true);
+      const userSeen = session.user.seenFeatures || [];
+      const hasNew = SYSTEM_CHANGELOG.some(f => !userSeen.includes(f.id));
+      if (hasNew) setShowFeaturePortal(true);
     }
   }, [session.user]);
 
@@ -184,7 +228,7 @@ const App: React.FC = () => {
   const handleSelectKey = async () => {
     if (window.aistudio) {
       await window.aistudio.openSelectKey();
-      setHasApiKey(true); 
+      setHasApiKey(true);
     }
   };
 
@@ -231,41 +275,41 @@ const App: React.FC = () => {
         orderId: log.orderId,
         energySource: log.energyUsed as EnergyCategory
       });
-      
+
       if (result) {
         setIngredients(result.ingredients);
         setFinishedGoods(result.finishedGoods);
         setMovements(result.movements);
-        
-        if (defects && defects.length > 0) {
-            const sku = skus.find(s => s.id === log.skuId);
-            const newLosses: InventoryLoss[] = defects.map(d => ({
-                id: `defect-${Date.now()}-${Math.random()}`,
-                date: log.date,
-                skuId: log.skuId,
-                quantity: d.qty,
-                reason: 'Defect',
-                defectType: d.type,
-                source: 'Production Sealing',
-                unitCost: sku?.factoryPrice || 0,
-                notes: `Identified on Shift`
-            }));
-            
-            const newQaLogs: QALog[] = defects.map(d => ({
-                id: `qa-${Date.now()}-${Math.random()}`,
-                skuId: log.skuId,
-                responsiblePersonnelId: log.operatorId || 'Floor Supervisor',
-                date: log.date,
-                result: 'Fail',
-                defectType: d.type,
-                parameters: {},
-                notes: `Defect logged during sealing`
-            }));
 
-            setInventoryLosses([...newLosses, ...result.inventoryLosses]);
-            setQaLogs([...newQaLogs, ...qaLogs]);
+        if (defects && defects.length > 0) {
+          const sku = skus.find(s => s.id === log.skuId);
+          const newLosses: InventoryLoss[] = defects.map(d => ({
+            id: `defect-${Date.now()}-${Math.random()}`,
+            date: log.date,
+            skuId: log.skuId,
+            quantity: d.qty,
+            reason: 'Defect',
+            defectType: d.type,
+            source: 'Production Sealing',
+            unitCost: sku?.factoryPrice || 0,
+            notes: `Identified on Shift`
+          }));
+
+          const newQaLogs: QALog[] = defects.map(d => ({
+            id: `qa-${Date.now()}-${Math.random()}`,
+            skuId: log.skuId,
+            responsiblePersonnelId: log.operatorId || 'Floor Supervisor',
+            date: log.date,
+            result: 'Fail',
+            defectType: d.type,
+            parameters: {},
+            notes: `Defect logged during sealing`
+          }));
+
+          setInventoryLosses([...newLosses, ...result.inventoryLosses]);
+          setQaLogs([...newQaLogs, ...qaLogs]);
         } else {
-            setInventoryLosses(result.inventoryLosses);
+          setInventoryLosses(result.inventoryLosses);
         }
 
         setTransactions(result.transactions);
@@ -302,20 +346,20 @@ const App: React.FC = () => {
       wbTickets, gatePasses, users, agents, qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile
     },
     onImportData: (data: any) => {
-        if (data.taxConfig) setTaxConfig(data.taxConfig);
-        if (data.skus) setSkus(data.skus);
-        if (data.ingredients) setIngredients(data.ingredients);
-        if (data.employees) setEmployees(data.employees);
-        if (data.transactions) setTransactions(data.transactions);
-        if (data.productionLogs) setProductionLogs(data.productionLogs);
-        if (data.sales) setSales(data.sales);
-        if (data.customers) setCustomers(data.customers);
-        if (data.orders) setOrders(data.orders);
-        if (data.finishedGoods) setFinishedGoods(data.finishedGoods);
-        if (data.outlets) setOutlets(data.outlets);
-        if (data.outletStocks) setOutletStocks(data.outletStocks);
-        if (data.inventoryLosses) setInventoryLosses(data.inventoryLosses);
-        if (data.businessProfile) setBusinessProfile(data.businessProfile);
+      if (data.taxConfig) setTaxConfig(data.taxConfig);
+      if (data.skus) setSkus(data.skus);
+      if (data.ingredients) setIngredients(data.ingredients);
+      if (data.employees) setEmployees(data.employees);
+      if (data.transactions) setTransactions(data.transactions);
+      if (data.productionLogs) setProductionLogs(data.productionLogs);
+      if (data.sales) setSales(data.sales);
+      if (data.customers) setCustomers(data.customers);
+      if (data.orders) setOrders(data.orders);
+      if (data.finishedGoods) setFinishedGoods(data.finishedGoods);
+      if (data.outlets) setOutlets(data.outlets);
+      if (data.outletStocks) setOutletStocks(data.outletStocks);
+      if (data.inventoryLosses) setInventoryLosses(data.inventoryLosses);
+      if (data.businessProfile) setBusinessProfile(data.businessProfile);
     }
   };
 
@@ -330,7 +374,7 @@ const App: React.FC = () => {
               Please activate your subscription layer by selecting a valid strategic API key.
             </p>
           </div>
-          <button 
+          <button
             onClick={handleSelectKey}
             className="px-12 py-5 bg-indigo-900 text-white rounded-[2rem] font-black uppercase text-sm tracking-widest shadow-xl hover:bg-black transition-all active:scale-95"
           >
@@ -368,53 +412,47 @@ const App: React.FC = () => {
     }
   };
 
+  // ── Show login screen if not authenticated ───────────────────────────────
   if (!session.user) {
-  return (
-    <AuthGate
-      session={session}
-      users={users}
-      onLogin={(user) => {
-        const matched = users.find(
-          u => (u.identity === user.identity) && (u.passwordHash === user.passwordHash)
-        );
-        if (matched) {
-          setSession({ user: matched, token: 'local' });
-        }
-      }}
-      onVerifyMfa={() => {}}
-      onRegister={(newUser) => setUsers([...users, newUser])}
-      taxConfig={taxConfig}
-    />
-  );
-}
-
-return (
-  <Layout 
-    activeTab={activeTab} setActiveTab={setActiveTab} session={session} onLogout={() => {
-  localStorage.clear();
-  setSession({ user: null, token: null });
-}} onOpenSearch={() => setIsSearchOpen(true)} 
-    activeCurrency={activeCurrency} setActiveCurrency={setActiveCurrency} subscriptionTier={subscriptionTier}
-    activeLanguage={activeLanguage}
-  >
-    {renderContent()}
-    <GlobalSearch 
-      isOpen={isSearchOpen} 
-      onClose={() => setIsSearchOpen(false)} 
-      skus={skus} 
-      ingredients={ingredients} 
-      onNavigate={(tab) => { setActiveTab(tab); setIsSearchOpen(false); }}
-      location={taxConfig.nation}
-    />
-    {showFeaturePortal && session.user && (
-      <FeatureUpdatePortal 
-        user={session.user} 
-        onUpdateUser={handleUpdateUser} 
-        onClose={() => setShowFeaturePortal(false)} 
+    return (
+      <AuthGate
+        session={session}
+        users={users}
+        onLogin={(user) => setSession({ user, token: 'local' })}
+        onVerifyMfa={() => {}}
+        onRegister={(newUser) => setUsers([...users, newUser])}
+        taxConfig={taxConfig}
       />
-    )}
-  </Layout>
-);
+    );
+  }
+
+  return (
+    <Layout
+      activeTab={activeTab} setActiveTab={setActiveTab} session={session}
+      onLogout={() => setSession({ user: null, token: null })}
+      onOpenSearch={() => setIsSearchOpen(true)}
+      activeCurrency={activeCurrency} setActiveCurrency={setActiveCurrency}
+      subscriptionTier={subscriptionTier}
+      activeLanguage={activeLanguage}
+    >
+      {renderContent()}
+      <GlobalSearch
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        skus={skus}
+        ingredients={ingredients}
+        onNavigate={(tab) => { setActiveTab(tab); setIsSearchOpen(false); }}
+        location={taxConfig.nation}
+      />
+      {showFeaturePortal && session.user && (
+        <FeatureUpdatePortal
+          user={session.user}
+          onUpdateUser={handleUpdateUser}
+          onClose={() => setShowFeaturePortal(false)}
+        />
+      )}
+    </Layout>
+  );
 };
 
 export default App;

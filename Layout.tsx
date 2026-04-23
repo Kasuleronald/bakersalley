@@ -158,15 +158,13 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
 
       {/* Sidebar */}
       <motion.aside 
-  initial={false}
-  animate={{ 
-    x: typeof window !== 'undefined' && window.innerWidth >= 768 
-      ? 0 
-      : isMobileMenuOpen ? 0 : '-100%',
-    transition: { type: 'spring', damping: 25, stiffness: 200 }
-  }}
-  className={`fixed top-0 left-0 bottom-0 w-64 bg-bakery-950 text-white z-[90] md:relative md:translate-x-0`}
->
+        initial={false}
+        animate={{ 
+          x: isMobileMenuOpen ? 0 : '-100%',
+          transition: { type: 'spring', damping: 25, stiffness: 200 }
+        }}
+        className={`fixed top-0 left-0 bottom-0 w-64 bg-bakery-950 text-white z-[90] md:relative md:translate-x-0`}
+      >
         <div className="flex flex-col h-full">
           <div className="p-8 space-y-4">
             <h1 className="text-2xl font-black font-serif tracking-tighter text-harvest-400">BakersAlley</h1>
