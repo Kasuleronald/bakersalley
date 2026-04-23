@@ -7,9 +7,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'Arial', 'sans-serif'],
-        serif: ['Playfair Display', 'Georgia', 'serif'],
-      },
+        sans: ['DM Sans', 'Arial', 'sans-serif'],
+        serif: ['Fraunces', 'Georgia', 'serif'],
+        },
       colors: {
         harvest: {
           50: '#fefce8',
