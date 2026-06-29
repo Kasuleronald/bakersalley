@@ -65,6 +65,24 @@
 				"status",
 				"--short"
 			]
+		},
+		{
+			"label": "lint-post-rbac-pass",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"lint"
+			]
+		},
+		{
+			"label": "lint-post-rbac-pass-cmd",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"lint"
+			]
 		}
 	]
 }
