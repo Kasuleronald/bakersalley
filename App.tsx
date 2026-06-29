@@ -6,7 +6,7 @@ import {
   User, AuthSession, MonthlyForecast, DailyOutletForecast, Outlet, OutletStock, 
   Payment, LeaveApplication, Webhook, ExternalIntegration, SubscriptionTier, CurrencyCode,
   Requisition, Loan, SupplierInvoice, Asset, MonthlyBudget, Supplier, WeighbridgeTicket, GatePass, LanguageCode, InventoryMovement,
-  QALog, RMQALog, SalesAgent, TaxConfig, BoardDirective, EnergyCategory, Lead, DefectCategory, BusinessProfile
+  QALog, RMQALog, SalesAgent, TaxConfig, BoardDirective, EnergyCategory, Lead, DefectCategory, BusinessProfile, Organization
 } from './types';
 import { 
   INITIAL_USERS, INITIAL_EMPLOYEES, INITIAL_INGREDIENTS, INITIAL_SKUS, 
@@ -42,8 +42,10 @@ import QualityAssurance from './components/QualityAssurance';
 import GlobalSearch from './components/GlobalSearch';
 import FeatureUpdatePortal from './components/FeatureUpdatePortal';
 import SupportAssistant from './components/SupportAssistant';
+import AdminConsole from './components/AdminConsole';
 import { bakeryService } from './services/bakeryService';
 import { apiClient } from './services/apiClient';
+import { hasTabAccess } from './utils/accessControl';
 
 const App: React.FC = () => {
 
@@ -111,6 +113,15 @@ const App: React.FC = () => {
     privateCloudProvider: 'GoogleDrive',
     encryptionKeyHint: 'Sovereign Master Pass'
   });
+  const [organizations, setOrganizations] = useState<Organization[]>([
+    {
+      id: 'org-default',
+      name: 'Bakery ABC',
+      status: 'Active',
+      subscriptionTier: 'Enterprise',
+      createdAt: new Date().toISOString(),
+    },
+  ]);
 
   const [skus, setSkus] = useState<SKU[]>(INITIAL_SKUS);
   const [ingredients, setIngredients] = useState<Ingredient[]>(INITIAL_INGREDIENTS);
@@ -188,6 +199,7 @@ const App: React.FC = () => {
         if (db.leaveApplications) setLeaveApplications(db.leaveApplications);
         if (db.leads) setLeads(db.leads);
         if (db.businessProfile) setBusinessProfile(db.businessProfile);
+        if (db.organizations) setOrganizations(db.organizations);
       }
     };
     init();
@@ -229,7 +241,7 @@ const App: React.FC = () => {
         requisitions, loans, invoices, forecasts, outletForecasts,
         movements, assets, suppliers, budgets, accountGroups,
         wbTickets, gatePasses, users, agents, directives,
-        qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile
+        qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile, organizations
       };
       await apiClient.saveDb(fullState);
     };
@@ -241,8 +253,10 @@ const App: React.FC = () => {
     outlets, finishedGoods, outletStocks, inventoryLosses,
     requisitions, loans, invoices, forecasts, outletForecasts,
     movements, assets, suppliers, budgets, accountGroups,
-    wbTickets, gatePasses, users, agents, qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile
+    wbTickets, gatePasses, users, agents, qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile, organizations
   ]);
+
+  const canAccessTab = (tabId: string) => hasTabAccess(session.user, tabId);
 
   // All core amounts are stored in UGX and converted at render time for display.
   const currencyConfig = {
@@ -357,7 +371,7 @@ const App: React.FC = () => {
       finishedGoods, outletStocks, inventoryLosses,
       requisitions, loans, invoices, forecasts, outletForecasts,
       movements, assets, suppliers, budgets, accountGroups,
-      wbTickets, gatePasses, users, agents, qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile
+      wbTickets, gatePasses, users, agents, qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile, organizations
     },
     onImportData: (data: any) => {
       if (data.taxConfig) setTaxConfig(data.taxConfig);
@@ -374,10 +388,20 @@ const App: React.FC = () => {
       if (data.outletStocks) setOutletStocks(data.outletStocks);
       if (data.inventoryLosses) setInventoryLosses(data.inventoryLosses);
       if (data.businessProfile) setBusinessProfile(data.businessProfile);
+      if (data.organizations) setOrganizations(data.organizations);
     }
   };
 
   const renderContent = () => {
+    if (!canAccessTab(activeTab)) {
+      return (
+        <div className="bg-white p-12 rounded-[2rem] border border-rose-100 text-center">
+          <h2 className="text-2xl font-bold text-rose-700">Access Restricted</h2>
+          <p className="text-slate-500 mt-2">Your role is not authorized to access this module.</p>
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case 'dashboard': return <Dashboard cashOnHand={1000000} totalRevenue={5000000} currency={currencyConfig} onNavigate={setActiveTab} activeLanguage={activeLanguage} />;
       case 'mgmt-accountant': return <ManagementAccountant {...commonProps} />;
@@ -402,6 +426,7 @@ const App: React.FC = () => {
       case 'qa': return <QualityAssurance {...commonProps} />;
       case 'support': return <SupportAssistant {...commonProps} />;
       case 'neural-hub': return <NeuralHub {...commonProps} onNavigate={setActiveTab} />;
+      case 'admin-console': return <AdminConsole users={users} setUsers={setUsers} organizations={organizations} setOrganizations={setOrganizations} />;
       default: return <Dashboard cashOnHand={0} totalRevenue={0} currency={currencyConfig} onNavigate={setActiveTab} activeLanguage={activeLanguage} />;
     }
   };
@@ -411,7 +436,7 @@ const App: React.FC = () => {
     return (
       <AuthGate
         session={session}
-        onLogin={(user, token) => setSession({ user, token })}
+        onLogin={(user, token) => setSession({ user, token, businessId: user.orgId, orgId: user.orgId })}
         onVerifyMfa={() => {}}
         users={users}
         onRegister={(newUser) => setUsers([...users, newUser])}
@@ -428,6 +453,7 @@ const App: React.FC = () => {
       activeCurrency={activeCurrency} setActiveCurrency={setActiveCurrency}
       subscriptionTier={subscriptionTier}
       activeLanguage={activeLanguage}
+      canAccessTab={canAccessTab}
     >
       {renderContent()}
       <GlobalSearch
