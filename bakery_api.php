@@ -148,6 +148,44 @@ function save_db($path, $db) {
     file_put_contents($path, json_encode($db, JSON_PRETTY_PRINT), LOCK_EX);
 }
 
+function normalize_multitenant_db($db) {
+    if (!is_array($db)) {
+        $db = [];
+    }
+
+    if (!isset($db['users']) || !is_array($db['users'])) {
+        $db['users'] = [];
+    }
+
+    if (!isset($db['organizations']) || !is_array($db['organizations'])) {
+        $db['organizations'] = [[
+            "id" => "org-default",
+            "name" => "Default Organization",
+            "status" => "Active",
+            "subscriptionTier" => "Enterprise",
+            "createdAt" => date('c')
+        ]];
+    }
+
+    if (!isset($db['tenants']) || !is_array($db['tenants'])) {
+        $legacy = $db;
+        unset($legacy['users'], $legacy['organizations'], $legacy['tenants'], $legacy['__meta'], $legacy['last_init']);
+
+        $db['tenants'] = [
+            "org-default" => $legacy
+        ];
+    }
+
+    foreach ($db['users'] as &$u) {
+        if (!isset($u['orgId']) || !$u['orgId']) {
+            $u['orgId'] = 'org-default';
+        }
+    }
+    unset($u);
+
+    return $db;
+}
+
 function call_gemini_proxy($apiKey, $model, $prompt, $systemInstruction = '', $responseMimeType = '') {
     if (!$apiKey) {
         return ["ok" => false, "status" => 500, "error" => "GEMINI_API_KEY is not configured on server"];
@@ -235,6 +273,7 @@ if (!file_exists($DATA_FILE)) {
             "id" => "u-admin",
             "name" => env_or_default('BAKERY_BOOTSTRAP_ADMIN_NAME', 'System Admin'),
             "identity" => env_or_default('BAKERY_BOOTSTRAP_ADMIN_IDENTITY', 'admin@bakery.com'),
+            "orgId" => env_or_default('BAKERY_BOOTSTRAP_ORG_ID', 'org-default'),
             "passwordHash" => password_hash($bootstrapPassword, PASSWORD_BCRYPT),
             "role" => "Admin",
             "department" => "SuperAdmin"
@@ -242,12 +281,23 @@ if (!file_exists($DATA_FILE)) {
     }
 
     file_put_contents($DATA_FILE, json_encode([
-        "ingredients" => [],
-        "skus" => [],
-        "sales" => [],
-        "transactions" => [],
-        "productionLogs" => [],
         "users" => $initialUsers,
+        "organizations" => [[
+            "id" => "org-default",
+            "name" => env_or_default('BAKERY_BOOTSTRAP_ORG_NAME', 'Default Organization'),
+            "status" => "Active",
+            "subscriptionTier" => "Enterprise",
+            "createdAt" => date('c')
+        ]],
+        "tenants" => [
+            "org-default" => [
+                "ingredients" => [],
+                "skus" => [],
+                "sales" => [],
+                "transactions" => [],
+                "productionLogs" => []
+            ]
+        ],
         "last_init" => date('Y-m-d H:i:s')
     ]));
 }
@@ -284,7 +334,8 @@ switch($action) {
             );
         }
 
-        $db = json_decode(file_get_contents($DATA_FILE), true);
+        $db = normalize_multitenant_db(json_decode(file_get_contents($DATA_FILE), true));
+        save_db($DATA_FILE, $db);
         $user = null;
         foreach($db['users'] as $u) {
             if ($u['identity'] === $identity) {
@@ -316,6 +367,7 @@ switch($action) {
             $payload = [
                 "uid" => $user['id'],
                 "role" => $user['role'],
+                "orgId" => ($user['orgId'] ?? 'org-default'),
                 "name" => $user['name'],
                 "exp" => time() + (8 * 3600) // 8 hour session
             ];
@@ -354,10 +406,8 @@ switch($action) {
             json_response(400, ["status" => "error", "message" => "Password must be at least 8 characters."]);
         }
 
-        $db = json_decode(file_get_contents($DATA_FILE), true);
-        if (!isset($db['users']) || !is_array($db['users'])) {
-            $db['users'] = [];
-        }
+        $db = normalize_multitenant_db(json_decode(file_get_contents($DATA_FILE), true));
+        $orgId = 'org-default';
 
         foreach ($db['users'] as $u) {
             if (strtolower((string)($u['identity'] ?? '')) === strtolower($identity)) {
@@ -369,6 +419,7 @@ switch($action) {
             "id" => "u-" . time() . "-" . mt_rand(1000, 9999),
             "name" => $name,
             "identity" => $identity,
+            "orgId" => $orgId,
             "passwordHash" => password_hash($password, PASSWORD_BCRYPT),
             "role" => "Staff",
             "department" => "Administration",
