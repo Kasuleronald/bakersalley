@@ -28,11 +28,11 @@ const ReportingCenter: React.FC<ReportingCenterProps> = ({ skus, ingredients, em
         return {
           title: 'Raw Materials & Stock Audit',
           filename: 'Inventory_Audit',
-          headers: [['Material Name', 'Category', 'Unit', 'In Stock', 'Reorder Level', 'Unit Cost (UGX)', 'Valuation (UGX)', 'Supplier']],
+          headers: [['Material Name', 'Category', 'Unit', 'In Stock', 'Reorder Level', `Unit Cost (${currency.active})`, `Valuation (${currency.active})`, 'Supplier']],
           data: ingredients.map(i => [
             i.name, i.category, i.unit, i.currentStock.toLocaleString(), 
             i.reorderLevel.toLocaleString(),
-            i.costPerUnit.toLocaleString(), (i.currentStock * i.costPerUnit).toLocaleString(),
+            currency.format(i.costPerUnit), currency.format(i.currentStock * i.costPerUnit),
             i.supplierName || 'Unassigned'
           ]),
           raw: ingredients.map(i => ({
@@ -41,8 +41,8 @@ const ReportingCenter: React.FC<ReportingCenterProps> = ({ skus, ingredients, em
             'Unit': i.unit,
             'Current Stock': i.currentStock,
             'Reorder Level': i.reorderLevel,
-            'Unit Cost (UGX)': i.costPerUnit,
-            'Valuation (UGX)': i.currentStock * i.costPerUnit,
+            [`Unit Cost (${currency.active})`]: i.costPerUnit,
+            [`Valuation (${currency.active})`]: i.currentStock * i.costPerUnit,
             'Supplier': i.supplierName || 'Unassigned'
           })),
           total: ingredients.reduce((s, i) => s + (i.currentStock * i.costPerUnit), 0),
@@ -52,9 +52,9 @@ const ReportingCenter: React.FC<ReportingCenterProps> = ({ skus, ingredients, em
         return {
           title: 'Product Formulation Library',
           filename: 'Master_Formulations',
-          headers: [['Product SKU', 'Category', 'Batch Yield', 'Retail Price (UGX)', 'Materials Used']],
+          headers: [['Product SKU', 'Category', 'Batch Yield', `Retail Price (${currency.active})`, 'Materials Used']],
           data: skus.map(s => [
-            s.name, s.category, `${s.yield} ${s.unit}`, s.retailPrice.toLocaleString(), 
+            s.name, s.category, `${s.yield} ${s.unit}`, currency.format(s.retailPrice), 
             s.recipeItems.length.toString()
           ]),
           raw: skus,
@@ -65,9 +65,9 @@ const ReportingCenter: React.FC<ReportingCenterProps> = ({ skus, ingredients, em
         return {
           title: 'Human Capital & Payroll Audit',
           filename: 'Staff_Ledger',
-          headers: [['Staff Name', 'Role', 'Department', 'Type', 'Base Monthly (UGX)']],
+          headers: [['Staff Name', 'Role', 'Department', 'Type', `Base Monthly (${currency.active})`]],
           data: employees.map(e => [
-            e.name, e.role, e.department, e.employmentType, (e.salary || 0).toLocaleString()
+            e.name, e.role, e.department, e.employmentType, currency.format(e.salary || 0)
           ]),
           raw: employees,
           total: employees.reduce((s, e) => s + (e.salary || 0), 0),
@@ -77,14 +77,14 @@ const ReportingCenter: React.FC<ReportingCenterProps> = ({ skus, ingredients, em
         return {
           title: 'Commercial Sales Ledger',
           filename: 'Sales_Audit',
-          headers: [['Date', 'Product', 'Quantity', 'Unit Price', 'Discount', 'Net Total (UGX)']],
+          headers: [['Date', 'Product', 'Quantity', `Unit Price (${currency.active})`, `Discount (${currency.active})`, `Net Total (${currency.active})`]],
           data: sales.map(s => [
             new Date(s.date).toLocaleDateString(), 
             skus.find(x => x.id === s.skuId)?.name || 'Unknown', 
             s.quantity.toLocaleString(), 
-            s.unitPrice.toLocaleString(),
-            (s.discountAmount || 0).toLocaleString(),
-            s.totalPrice.toLocaleString()
+            currency.format(s.unitPrice),
+            currency.format(s.discountAmount || 0),
+            currency.format(s.totalPrice)
           ]),
           raw: sales,
           total: sales.reduce((s, x) => s + x.totalPrice, 0),
@@ -111,14 +111,14 @@ const ReportingCenter: React.FC<ReportingCenterProps> = ({ skus, ingredients, em
         return {
           title: 'Expenditure & Treasury Ledger',
           filename: 'Financial_Journal',
-          headers: [['Date', 'Account', 'Category', 'Description', 'Debit (UGX)', 'Credit (UGX)']],
+          headers: [['Date', 'Account', 'Category', 'Description', `Debit (${currency.active})`, `Credit (${currency.active})`]],
           data: transactions.map(t => [
             new Date(t.date).toLocaleDateString(),
             t.account,
             t.category,
             t.description,
-            t.type === 'Debit' ? t.amount.toLocaleString() : '',
-            t.type === 'Credit' ? t.amount.toLocaleString() : ''
+            t.type === 'Debit' ? currency.format(t.amount) : '',
+            t.type === 'Credit' ? currency.format(t.amount) : ''
           ]),
           raw: transactions,
           total: transactions.reduce((s, x) => x.type === 'Credit' ? s + x.amount : s - x.amount, 0),
