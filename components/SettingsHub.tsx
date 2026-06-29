@@ -177,7 +177,7 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
       )}
 
       {activeTab === 'Billing' && (
-        <SubscriptionManager currentTier={subscriptionTier} setTier={setSubscriptionTier} />
+        <SubscriptionManager currentTier={subscriptionTier} setTier={setSubscriptionTier} activeCurrency={activeCurrency} />
       )}
     </div>
   );

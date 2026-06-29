@@ -1,15 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { SubscriptionTier } from '../types';
+import { SubscriptionTier, CurrencyCode } from '../types';
 
 interface SubscriptionManagerProps {
   currentTier: SubscriptionTier;
   setTier: (tier: SubscriptionTier) => void;
+  activeCurrency?: CurrencyCode;
 }
 
 interface TierPlan {
   id: SubscriptionTier;
   name: string;
-  price: string;
+  monthlyUgx?: number;
   description: string;
   features: string[];
   color: string;
@@ -20,7 +21,6 @@ const FEATURE_PLANS: TierPlan[] = [
   {
     id: 'Demo',
     name: 'Strategic Demo',
-    price: 'Free Trial',
     description: 'Full system functionality for 3 months. Perfect for a Go-Live test.',
     features: [
       'ALL System Modules Included',
@@ -35,7 +35,7 @@ const FEATURE_PLANS: TierPlan[] = [
   {
     id: 'Essentials',
     name: 'Bakery Essentials',
-    price: 'UGX 150,000 / mo',
+    monthlyUgx: 150000,
     description: 'Core operational tools for retail bakeries and small hotels.',
     features: [
       'Basic POS & Invoicing',
@@ -50,7 +50,7 @@ const FEATURE_PLANS: TierPlan[] = [
   {
     id: 'Pro',
     name: 'Industrial Growth',
-    price: 'UGX 350,000 / mo',
+    monthlyUgx: 350000,
     description: 'Full financial transparency for growing factory floors.',
     features: [
       'Everything in Essentials',
@@ -64,7 +64,7 @@ const FEATURE_PLANS: TierPlan[] = [
   {
     id: 'Enterprise',
     name: 'Global Standard',
-    price: 'UGX 500,000 / mo',
+    monthlyUgx: 500000,
     description: 'Industrial-grade strategy and global scalability.',
     features: [
       'Everything in Industrial',
@@ -77,9 +77,26 @@ const FEATURE_PLANS: TierPlan[] = [
   }
 ];
 
-const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({ currentTier, setTier }) => {
+const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({ currentTier, setTier, activeCurrency = 'UGX' }) => {
   const [billingMode, setBillingMode] = useState<'Features' | 'Seats'>('Features');
   const [userCount, setUserCount] = useState(5);
+
+  const fxFromUgx: Record<CurrencyCode, number> = {
+    UGX: 1,
+    USD: 1 / 3750,
+    EUR: 1 / 4100,
+    KES: 1 / 29,
+    GBP: 1 / 4800,
+  };
+
+  const formatMoney = (ugxAmount: number) => {
+    const converted = ugxAmount * (fxFromUgx[activeCurrency] || 1);
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: activeCurrency,
+      maximumFractionDigits: activeCurrency === 'UGX' ? 0 : 2,
+    }).format(converted);
+  };
 
   const seatTierData = useMemo(() => {
     let rate = 40000;
@@ -138,7 +155,7 @@ const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({ currentTier, 
                       <h3 className="text-xl font-bold font-serif">{plan.name}</h3>
                       {plan.isTrial && <span className="bg-amber-400 text-amber-900 text-[8px] font-black px-2 py-0.5 rounded-full uppercase">Testing Only</span>}
                     </div>
-                    <div className="text-2xl font-black font-mono tracking-tighter mb-4">{plan.price}</div>
+                    <div className="text-2xl font-black font-mono tracking-tighter mb-4">{plan.monthlyUgx ? `${formatMoney(plan.monthlyUgx)} / mo` : 'Free Trial'}</div>
                     <p className={`text-xs leading-relaxed opacity-70`}>
                       {plan.description}
                     </p>
@@ -212,7 +229,7 @@ const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({ currentTier, 
                     ].map(t => (
                       <div key={t.range} className={`p-4 rounded-3xl border text-center transition-all ${t.active ? 'bg-indigo-900 border-indigo-900 text-white shadow-xl scale-110' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
                          <div className="text-[9px] font-black uppercase mb-1">{t.range} Users</div>
-                         <div className="text-lg font-mono font-black">UGX {t.rate}</div>
+                         <div className="text-lg font-mono font-black">{formatMoney(Number(t.rate.replace('k', '000')))}</div>
                          <div className="text-[7px] opacity-60 uppercase font-bold">per account</div>
                       </div>
                     ))}
@@ -235,7 +252,7 @@ const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({ currentTier, 
                  <div className="relative pt-10 border-t border-white/10 space-y-4">
                     <div className="flex justify-between items-center">
                        <span className="text-indigo-300 text-xs font-bold uppercase">Monthly Investment</span>
-                       <span className="text-3xl font-mono font-black text-white">UGX {seatTierData.total.toLocaleString()}</span>
+                      <span className="text-3xl font-mono font-black text-white">{formatMoney(seatTierData.total)}</span>
                     </div>
                     <p className="text-[9px] text-white/40 uppercase tracking-widest text-right">Includes all industrial features</p>
                  </div>
