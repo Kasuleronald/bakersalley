@@ -128,7 +128,7 @@ class ApiClient {
     
     if (config?.enabled && config.url && token) {
       try {
-        const response = await fetch(`${config.url}?key=${config.key}&action=read`, {
+        const response = await fetch(`${config.url}?action=read`, {
           method: 'GET',
           headers: { 
             'Accept': 'application/json',
