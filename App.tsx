@@ -204,7 +204,7 @@ const App: React.FC = () => {
       }
     };
     init();
-  }, []);
+  }, [session.token]);
 
   // Detect New Features for Registered Users
   useEffect(() => {
