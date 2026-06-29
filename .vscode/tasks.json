@@ -56,6 +56,15 @@
 				"-m",
 				"chore: restore point before tenant-rbac implementation"
 			]
+		},
+		{
+			"label": "git-status-after-tenant-rbac",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"status",
+				"--short"
+			]
 		}
 	]
 }
