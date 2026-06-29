@@ -11,11 +11,12 @@ interface SnOPHubProps {
   forecasts: MonthlyForecast[];
   setForecasts: (f: MonthlyForecast[]) => void;
   assets?: Asset[];
+   currency?: { active?: any; format: (v: number) => string; formatCompact?: (v: number) => string };
 }
 
 const PRODUCTION_DAYS = 26;
 
-const SnOPHub: React.FC<SnOPHubProps> = ({ skus, activities, employees, forecasts, setForecasts, assets = [] }) => {
+const SnOPHub: React.FC<SnOPHubProps> = ({ skus, activities, employees, forecasts, setForecasts, assets = [], currency }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiAdvice, setAiAdvice] = useState<any>(null);
@@ -308,7 +309,7 @@ const SnOPHub: React.FC<SnOPHubProps> = ({ skus, activities, employees, forecast
                        </span>
                     </td>
                     <td className="px-8 py-5 text-right font-mono font-bold text-gray-900">
-                       UGX {(p.supply * p.retailPrice).toLocaleString()}
+                       {currency?.format ? currency.format(p.supply * p.retailPrice) : (p.supply * p.retailPrice).toLocaleString()}
                     </td>
                  </tr>
                ))}

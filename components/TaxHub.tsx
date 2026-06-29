@@ -12,7 +12,7 @@ interface TaxHubProps {
   ingredients: Ingredient[];
   taxConfig: TaxConfig;
   setTaxConfig: (config: TaxConfig) => void;
-  currency: { format: (v: number) => string };
+   currency: { active?: any; format: (v: number) => string };
 }
 
 const TaxHub: React.FC<TaxHubProps> = ({ 
@@ -180,7 +180,7 @@ const TaxHub: React.FC<TaxHubProps> = ({
                     <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                        <div className="h-full bg-blue-600 transition-all duration-1000" style={{ width: `${Math.min(100, (stats.revenue / 150000000) * 100)}%` }}></div>
                     </div>
-                    <p className="text-[9px] text-slate-500 font-medium">Monitoring cumulative turnover against UGX 150M statutory limit.</p>
+                    <p className="text-[9px] text-slate-500 font-medium">Monitoring cumulative turnover against the statutory registration threshold.</p>
                  </div>
                  <div className="w-32 text-right">
                     <div className="text-2xl font-black font-mono text-slate-900">{Math.round((stats.revenue / 150000000) * 100)}%</div>
