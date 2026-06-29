@@ -83,6 +83,15 @@
 				"run",
 				"lint"
 			]
+		},
+		{
+			"label": "git-status-after-fixes",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"status",
+				"--short"
+			]
 		}
 	]
 }
