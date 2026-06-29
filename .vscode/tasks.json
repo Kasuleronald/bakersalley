@@ -19,6 +19,24 @@
 				"panel": "dedicated",
 				"clear": false
 			}
+		},
+		{
+			"label": "git-status-checkpoint",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"status",
+				"--short"
+			]
+		},
+		{
+			"label": "git-branch-checkpoint",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"branch",
+				"--show-current"
+			]
 		}
 	]
 }
