@@ -1,21 +1,56 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Auto Sync to GitHub",
-      "type": "shell",
-      "command": "npm.cmd",
-      "args": ["run", "autosync"],
-      "isBackground": true,
-      "problemMatcher": [],
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": false
-      }
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Auto Sync to GitHub",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"autosync"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"runOptions": {
+				"runOn": "folderOpen"
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": false
+			}
+		},
+		{
+			"label": "git-status-check",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"status",
+				"--short"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-status-branch",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"status",
+				"-sb"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "git-log-last",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"log",
+				"--oneline",
+				"-n",
+				"6"
+			],
+			"isBackground": false
+		}
+	]
 }
