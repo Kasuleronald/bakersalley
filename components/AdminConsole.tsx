@@ -1,0 +1,164 @@
+import React, { useState } from 'react';
+import { Organization, SubscriptionTier, User, UserRole } from '../types';
+
+interface AdminConsoleProps {
+  users: User[];
+  setUsers: (users: User[]) => void;
+  organizations: Organization[];
+  setOrganizations: (orgs: Organization[]) => void;
+}
+
+const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizations, setOrganizations }) => {
+  const [activeTab, setActiveTab] = useState<'Organizations' | 'Users'>('Organizations');
+  const [orgName, setOrgName] = useState('');
+  const [orgTier, setOrgTier] = useState<SubscriptionTier>('Essentials');
+
+  const addOrganization = () => {
+    if (!orgName.trim()) return;
+    const org: Organization = {
+      id: `org-${Date.now()}`,
+      name: orgName.trim(),
+      status: 'Active',
+      subscriptionTier: orgTier,
+      createdAt: new Date().toISOString(),
+    };
+    setOrganizations([org, ...organizations]);
+    setOrgName('');
+    setOrgTier('Essentials');
+  };
+
+  const updateUserRole = (id: string, role: UserRole | string) => {
+    setUsers(users.map(u => (u.id === id ? { ...u, role } : u)));
+  };
+
+  const updateUserOrg = (id: string, orgId: string) => {
+    setUsers(users.map(u => (u.id === id ? { ...u, orgId } : u)));
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-slate-900 font-serif">Platform Admin Console</h2>
+          <p className="text-slate-500 text-sm">Manage organizations, users, role ranks, and tenant assignments.</p>
+        </div>
+        <div className="flex bg-slate-100 p-1 rounded-xl">
+          {(['Organizations', 'Users'] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setActiveTab(t)}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase ${activeTab === t ? 'bg-white text-slate-900' : 'text-slate-500'}`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {activeTab === 'Organizations' && (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div className="md:col-span-2">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Organization Name</label>
+                <input
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={orgName}
+                  onChange={e => setOrgName(e.target.value)}
+                  placeholder="Bakery ABC"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Tier</label>
+                <select
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={orgTier}
+                  onChange={e => setOrgTier(e.target.value as SubscriptionTier)}
+                >
+                  {(['Essentials', 'Pro', 'Enterprise', 'Demo'] as SubscriptionTier[]).map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <button onClick={addOrganization} className="w-full p-3 rounded-xl bg-slate-900 text-white font-bold text-xs uppercase">
+                  Add Organization
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 text-[10px] uppercase text-slate-500">
+                  <th className="px-6 py-4">Organization</th>
+                  <th className="px-6 py-4">Tier</th>
+                  <th className="px-6 py-4">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {organizations.map(org => (
+                  <tr key={org.id}>
+                    <td className="px-6 py-4 font-semibold">{org.name}</td>
+                    <td className="px-6 py-4">{org.subscriptionTier}</td>
+                    <td className="px-6 py-4">{org.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'Users' && (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-50 text-[10px] uppercase text-slate-500">
+                <th className="px-6 py-4">User</th>
+                <th className="px-6 py-4">Organization</th>
+                <th className="px-6 py-4">Role</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {users.map(u => (
+                <tr key={u.id}>
+                  <td className="px-6 py-4">
+                    <div className="font-semibold">{u.name}</div>
+                    <div className="text-xs text-slate-500">{u.identity}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <select
+                      className="p-2 rounded-lg bg-slate-50 border border-slate-100"
+                      value={u.orgId || ''}
+                      onChange={e => updateUserOrg(u.id, e.target.value)}
+                    >
+                      <option value="">Unassigned</option>
+                      {organizations.map(org => (
+                        <option key={org.id} value={org.id}>{org.name}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-6 py-4">
+                    <select
+                      className="p-2 rounded-lg bg-slate-50 border border-slate-100"
+                      value={u.role}
+                      onChange={e => updateUserRole(u.id, e.target.value)}
+                    >
+                      {(['Platform Admin', 'Managing Director', 'Admin', 'Manager', 'Plant Manager', 'Finance', 'Store Keeper', 'Staff'] as UserRole[]).map(role => (
+                        <option key={role} value={role}>{role}</option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdminConsole;
