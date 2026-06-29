@@ -387,6 +387,7 @@ const App: React.FC = () => {
         session={session}
         onLogin={(user, token) => setSession({ user, token })}
         onVerifyMfa={() => {}}
+        users={users}
         onRegister={(newUser) => setUsers([...users, newUser])}
         taxConfig={taxConfig}
       />

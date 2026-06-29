@@ -7,11 +7,12 @@ interface AuthGateProps {
   session: AuthSession;
   onLogin: (user: User, token: string) => void;
   onVerifyMfa: () => void;
+  users: User[];
   onRegister: (user: User) => void;
   taxConfig?: TaxConfig;
 }
 
-const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, onRegister, taxConfig }) => {
+const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, onRegister, taxConfig }) => {
   const [view, setView] = useState<'Login' | 'Register'>('Login');
   const [identity, setIdentity] = useState('');
   const [name, setName] = useState('');
@@ -52,6 +53,12 @@ const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, onRegister, taxCo
       if (auth?.user && auth?.token) {
         onLogin(auth.user, auth.token);
       } else {
+        const matched = users.find(u => u.identity === identity && u.passwordHash === password);
+        if (matched) {
+          onLogin(matched, 'local-fallback');
+          return;
+        }
+
         setError("Invalid username or password.");
       }
     } else if (view === 'Register') {
