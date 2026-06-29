@@ -27,6 +27,24 @@ API_KEY=your_gemini_api_key_here
 npm run dev
 ```
 
+## Auto Sync to GitHub
+
+This project can auto-commit and auto-push saved changes to GitHub.
+
+- Start manually: `npm run autosync`
+- VS Code task: `Auto Sync to GitHub` (configured to start on folder open)
+
+Environment variables (optional):
+
+- `AUTO_SYNC_REMOTE` default: `origin`
+- `AUTO_SYNC_BRANCH` default: current branch
+- `AUTO_SYNC_DEBOUNCE_MS` default: `8000`
+
+Notes:
+
+- The watcher commits all tracked and untracked file changes in this repo.
+- Keep it disabled when doing sensitive or experimental work you do not want pushed.
+
 ## 🛠 Features
 - **Recipe Builder:** Advanced ABC costing with automated material waste calculation.
 - **Production Hub:** Live shift timers and daily capacity planning.
