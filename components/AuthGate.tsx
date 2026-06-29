@@ -75,8 +75,8 @@ const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, onRegister
         setError("A secure password is required.");
         return;
       }
-      if (password.length < 6) {
-        setError("Password must be at least 6 characters for industrial security.");
+      if (password.length < 8) {
+        setError("Password must be at least 8 characters for industrial security.");
         return;
       }
       if (!hasConsented) {

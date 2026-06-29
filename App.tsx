@@ -26,6 +26,7 @@ import HumanCapitalManager from './components/HumanCapitalManager';
 import SalesManager from './components/SalesManager';
 import SourcingDemandCenter from './components/SourcingDemandCenter';
 import ManagementAccountant from './components/ManagementAccountant';
+import CostAccountant from './components/CostAccountant';
 import VisualScheduler from './components/VisualScheduler';
 import SettingsHub from './components/SettingsHub';
 import UnifiedCRMHub from './components/UnifiedCRMHub';
@@ -405,6 +406,7 @@ const App: React.FC = () => {
     switch (activeTab) {
       case 'dashboard': return <Dashboard cashOnHand={1000000} totalRevenue={5000000} currency={currencyConfig} onNavigate={setActiveTab} activeLanguage={activeLanguage} />;
       case 'mgmt-accountant': return <ManagementAccountant {...commonProps} />;
+      case 'cost-accountant': return <CostAccountant {...commonProps} />;
       case 'debtors': return <DebtManager {...commonProps} />;
       case 'creditors': return <CreditorManager {...commonProps} />;
       case 'banking': return <BankingManager {...commonProps} />;
