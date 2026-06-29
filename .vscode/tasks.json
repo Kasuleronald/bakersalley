@@ -19,58 +19,6 @@
 				"panel": "dedicated",
 				"clear": false
 			}
-		},
-		{
-			"label": "git-final-status",
-			"type": "shell",
-			"command": "git",
-			"args": [
-				"status",
-				"-sb"
-			],
-			"isBackground": false
-		},
-		{
-			"label": "git-commit-push-priority-fixes",
-			"type": "shell",
-			"command": "cmd.exe",
-			"args": [
-				"/c",
-				"cd /d e:\\bakersalley && git add .vscode/tasks.json && git commit -m \"chore: clean workspace tasks after security hardening\" && git push origin main"
-			],
-			"isBackground": false
-		},
-		{
-			"label": "git-commit-push-clean-tasks",
-			"type": "shell",
-			"command": "cmd.exe",
-			"args": [
-				"/c",
-				"cd /d e:\\bakersalley && git add .vscode/tasks.json && git commit -m chore-clean-tasks && git push origin main"
-			],
-			"isBackground": false
-		},
-		{
-			"label": "git-post-push-status",
-			"type": "shell",
-			"command": "git",
-			"args": [
-				"status",
-				"-sb"
-			],
-			"isBackground": false
-		},
-		{
-			"label": "git-post-push-log",
-			"type": "shell",
-			"command": "git",
-			"args": [
-				"log",
-				"--oneline",
-				"-n",
-				"5"
-			],
-			"isBackground": false
 		}
 	]
 }
