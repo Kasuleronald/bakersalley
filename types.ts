@@ -3,6 +3,15 @@ export type DepartmentName = 'Administration' | 'Production' | 'Distribution & L
 export type CurrencyCode = 'UGX' | 'USD' | 'EUR' | 'KES' | 'GBP';
 export type LanguageCode = 'EN' | 'SW' | 'FR' | 'AR';
 export type SubscriptionTier = 'Essentials' | 'Pro' | 'Enterprise' | 'Demo';
+export type UserRole =
+  | 'Platform Admin'
+  | 'Managing Director'
+  | 'Admin'
+  | 'Manager'
+  | 'Plant Manager'
+  | 'Finance'
+  | 'Store Keeper'
+  | 'Staff';
 export type Unit = 'kg' | 'l' | 'ml' | 'g' | 'pc' | 'roll' | 'units' | 'tray' | 'Minutes' | 'Hours';
 export type CostingMethod = 'ABC' | 'Standard';
 export type StaffCategory = 'Permanent' | 'Contractor' | 'Outsourced/Agency' | 'Day Labor';
@@ -78,6 +87,14 @@ export interface BusinessProfile {
   privateCloudProvider: 'GoogleDrive' | 'S3' | 'LocalHost';
   cloudFileId?: string;
   encryptionKeyHint: string;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  status: 'Active' | 'Suspended';
+  subscriptionTier: SubscriptionTier;
+  createdAt: string;
 }
 
 export interface Transaction {
@@ -214,8 +231,9 @@ export interface User {
   name: string;
   identity: string;
   passwordHash?: string;
+  orgId?: string;
   department: DepartmentName;
-  role: string;
+  role: UserRole | string;
   mfaEnabled: boolean;
   authorityLimit: number;
   hasConsentedToPrivacy: boolean;
@@ -228,6 +246,7 @@ export interface AuthSession {
   user: User | null;
   token: string | null;
   businessId?: string;
+  orgId?: string;
 }
 
 export interface MonthlyBudget {
