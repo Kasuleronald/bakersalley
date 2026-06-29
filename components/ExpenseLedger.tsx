@@ -14,11 +14,12 @@ interface ExpenseLedgerProps {
   accountGroups: AccountGroup[];
   setAccountGroups: (groups: AccountGroup[]) => void;
   onManualCorrection?: (category: 'transactions', id: string, updates: Record<string, any>, reason: string) => void;
+  currency?: { active: any; format: (v: number) => string; formatCompact?: (v: number) => string };
 }
 
 const COLORS = ['#1e1b4b', '#4f46e5', '#818cf8', '#fbbf24', '#f59e0b', '#dc2626', '#db2777', '#7c3aed', '#ea580c', '#2563eb', '#16a34a', '#a855f7', '#64748b'];
 
-const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({ transactions, setTransactions, budgets, skus, accountGroups, setAccountGroups, onManualCorrection }) => {
+const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({ transactions, setTransactions, budgets, skus, accountGroups, setAccountGroups, onManualCorrection, currency }) => {
   const [activeSubTab, setActiveTab] = useState<'Ledger' | 'Categories'>('Ledger');
   const [showAddForm, setShowAddForm] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
@@ -140,7 +141,7 @@ const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({ transactions, setTransact
             <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 text-center">Period Spend Distribution</div>
                <div className="text-3xl font-bold font-mono text-slate-900 text-center mb-6">
-                  UGX {(Object.values(subcategorySpendMap) as number[]).reduce((a: number, b: number) => a + b, 0).toLocaleString()}
+                {currency?.format ? currency.format((Object.values(subcategorySpendMap) as number[]).reduce((a: number, b: number) => a + b, 0)) : (Object.values(subcategorySpendMap) as number[]).reduce((a: number, b: number) => a + b, 0).toLocaleString()}
                </div>
                <div className="h-64">
                  <ResponsiveContainer width="100%" height="100%">
@@ -148,7 +149,7 @@ const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({ transactions, setTransact
                      <Pie data={chartData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
                        {chartData.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                      </Pie>
-                     <Tooltip contentStyle={{borderRadius: '1rem', border: 'none'}} formatter={(v: any) => [`UGX ${v.toLocaleString()}`, 'Spend']} />
+                    <Tooltip contentStyle={{borderRadius: '1rem', border: 'none'}} formatter={(v: any) => [currency?.format ? currency.format(Number(v) || 0) : Number(v).toLocaleString(), 'Spend']} />
                    </PieChart>
                  </ResponsiveContainer>
                </div>
@@ -202,7 +203,7 @@ const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({ transactions, setTransact
                    />
                    
                    <div>
-                     <label className="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Magnitude (UGX)</label>
+                     <label className="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Magnitude ({currency?.active || 'UGX'})</label>
                      <input type="number" className="w-full px-6 py-4 rounded-2xl bg-slate-50 font-mono font-bold text-xl text-indigo-900 outline-none" value={newExp.amount || ''} onChange={e => setNewExp({...newExp, amount: parseFloat(e.target.value) || 0})} placeholder="0" />
                    </div>
 
@@ -267,7 +268,7 @@ const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({ transactions, setTransact
                             <span className="text-[8px] font-black uppercase text-indigo-400 tracking-tighter bg-indigo-50 px-2 py-0.5 rounded-full">{tx.subCategory}</span>
                         </td>
                         <td className="px-8 py-5 text-right font-mono font-black text-slate-900">
-                           {tx.amount.toLocaleString()}
+                          {currency?.format ? currency.format(tx.amount) : tx.amount.toLocaleString()}
                         </td>
                         <td className="px-8 py-5 text-right">
                            <button onClick={() => startCorrection(tx)} className="p-2 text-slate-300 hover:text-indigo-600 transition-all opacity-0 group-hover:opacity-100">✎ Adjust</button>
@@ -316,7 +317,7 @@ const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({ transactions, setTransact
                                  <div key={sub} className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex items-center justify-between group/sub">
                                     <div>
                                        <div className="text-[10px] font-bold text-slate-600 uppercase">{sub}</div>
-                                       <div className="text-[8px] font-mono font-bold text-indigo-400 mt-0.5">Total: UGX {spend.toLocaleString()}</div>
+                                      <div className="text-[8px] font-mono font-bold text-indigo-400 mt-0.5">Total: {currency?.format ? currency.format(spend) : spend.toLocaleString()}</div>
                                     </div>
                                  </div>
                                );

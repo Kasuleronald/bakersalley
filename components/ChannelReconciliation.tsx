@@ -81,7 +81,7 @@ const ChannelReconciliation: React.FC<ChannelReconciliationProps> = ({
 
   const handleFinalizeReconciliation = () => {
     if (!selectedOutletId) return;
-    if (!window.confirm(`Finalize audit for ${activeOutlet?.name}? This will record UGX ${stats.totalExposure.toLocaleString()} in channel losses.`)) return;
+    if (!window.confirm(`Finalize audit for ${activeOutlet?.name}? This will record ${currency.format(stats.totalExposure)} in channel losses.`)) return;
 
     let nextOutletStocks = [...outletStocks];
     let nextLosses = [...inventoryLosses];
