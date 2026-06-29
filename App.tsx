@@ -244,10 +244,36 @@ const App: React.FC = () => {
     wbTickets, gatePasses, users, agents, qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile
   ]);
 
+  // All core amounts are stored in UGX and converted at render time for display.
   const currencyConfig = {
     active: activeCurrency,
-    format: (v: number) => new Intl.NumberFormat('en-UG', { style: 'currency', currency: activeCurrency }).format(v),
-    formatCompact: (v: number) => new Intl.NumberFormat('en-UG', { notation: 'compact', compactDisplay: 'short' }).format(v)
+    rates: {
+      UGX: 1,
+      USD: 1 / 3750,
+      EUR: 1 / 4100,
+      KES: 1 / 29,
+      GBP: 1 / 4800,
+    } as Record<CurrencyCode, number>,
+    convert: (v: number) => {
+      const safe = Number.isFinite(v) ? v : 0;
+      return safe * (currencyConfig.rates[activeCurrency] || 1);
+    },
+    format: (v: number) => {
+      const converted = currencyConfig.convert(v);
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: activeCurrency,
+        maximumFractionDigits: activeCurrency === 'UGX' ? 0 : 2,
+      }).format(converted);
+    },
+    formatCompact: (v: number) => {
+      const converted = currencyConfig.convert(v);
+      return new Intl.NumberFormat('en-US', {
+        notation: 'compact',
+        compactDisplay: 'short',
+        maximumFractionDigits: activeCurrency === 'UGX' ? 0 : 2,
+      }).format(converted);
+    }
   };
 
   const handleLogProduction = async (log: ProductionLog, defects?: { type: DefectCategory, qty: number }[]) => {
