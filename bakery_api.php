@@ -498,6 +498,16 @@ switch($action) {
             $db = normalize_multitenant_db(json_decode(file_get_contents($DATA_FILE), true));
             $orgId = $token_payload['orgId'] ?? 'org-default';
             $db['tenants'][$orgId] = $data_to_save;
+
+            if (in_array($token_payload['role'], ['Admin', 'Managing Director', 'Platform Admin'])) {
+                if (isset($data_to_save['users']) && is_array($data_to_save['users'])) {
+                    $db['users'] = $data_to_save['users'];
+                }
+                if (isset($data_to_save['organizations']) && is_array($data_to_save['organizations'])) {
+                    $db['organizations'] = $data_to_save['organizations'];
+                }
+            }
+
             save_db($DATA_FILE, $db);
             echo json_encode(["status" => "success", "user" => $token_payload['name']]);
         }
