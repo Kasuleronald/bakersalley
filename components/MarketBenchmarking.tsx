@@ -9,7 +9,7 @@ interface MarketBenchmarkingProps {
   productionLogs: ProductionLog[];
   sales: Sale[];
   taxConfig: TaxConfig;
-  currency: { format: (v: number) => string; formatCompact: (v: number) => string };
+   currency: { active?: any; format: (v: number) => string; formatCompact: (v: number) => string };
 }
 
 const KAMPALA_PRESETS = [
@@ -131,7 +131,7 @@ const MarketBenchmarking: React.FC<MarketBenchmarkingProps> = ({ skus, ingredien
                       </div>
                       <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
                          <span className="text-[8px] font-black text-slate-300 uppercase">Retail Range</span>
-                         <span className="text-[10px] font-mono font-bold text-slate-500">{p.competitorRange} UGX</span>
+                         <span className="text-[10px] font-mono font-bold text-slate-500">{p.competitorRange} {currency.active || 'UGX'}</span>
                       </div>
                    </div>
                  )) : (

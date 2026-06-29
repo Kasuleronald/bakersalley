@@ -113,8 +113,8 @@ const MarketingHub: React.FC<MarketingHubProps> = ({ skus, sales, transactions, 
                </div>
 
                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-bold text-indigo-600 uppercase mb-2">3. Ad Spend (UGX)</label>
+                           <div>
+                              <label className="block text-[10px] font-bold text-indigo-600 uppercase mb-2">3. Ad Spend ({currency.active})</label>
                     <input type="number" className="w-full p-4 bg-indigo-50/30 border-none rounded-2xl font-mono font-bold text-lg outline-none focus:ring-2 focus:ring-indigo-500" value={promoBudget} onChange={e => setPromoBudget(parseFloat(e.target.value) || 0)} />
                   </div>
                   <div>
