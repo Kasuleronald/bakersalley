@@ -99,9 +99,9 @@ const CustomerManager: React.FC<CustomerManagerProps> = ({ customers, setCustome
         new Date(item.date).toLocaleDateString(),
         item.ref,
         item.desc,
-        item.debit > 0 ? `UGX ${item.debit.toLocaleString()}` : '--',
-        item.credit > 0 ? `UGX ${item.credit.toLocaleString()}` : '--',
-        `UGX ${runningBalance.toLocaleString()}`
+        item.debit > 0 ? currency.format(item.debit) : '--',
+        item.credit > 0 ? currency.format(item.credit) : '--',
+        currency.format(runningBalance)
       ]);
     });
 
@@ -111,7 +111,7 @@ const CustomerManager: React.FC<CustomerManagerProps> = ({ customers, setCustome
       body: tableData,
       theme: 'grid',
       headStyles: { fillColor: [30, 27, 75] },
-      foot: [['', '', 'CURRENT BALANCE DUE', '', '', `UGX ${runningBalance.toLocaleString()}`]],
+      foot: [['', '', 'CURRENT BALANCE DUE', '', '', currency.format(runningBalance)]],
       footStyles: { fillColor: [249, 245, 235], textColor: [0, 0, 0], fontStyle: 'bold' }
     });
 

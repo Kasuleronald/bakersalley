@@ -9,6 +9,7 @@ interface ActivityManagerProps {
   skus: SKU[];
   employees: Employee[];
   overheads: Overhead[];
+  currency?: { active: any; format: (v: number) => string; formatCompact?: (v: number) => string };
 }
 
 const DRIVER_GROUPS = {
@@ -23,7 +24,7 @@ const ENERGY_OPTIONS: EnergyCategory[] = ['Firewood', 'Charcoal', 'Electricity',
 
 const PRODUCTION_DAYS_PER_MONTH = 26;
 
-const ActivityManager: React.FC<ActivityManagerProps> = ({ activities, setActivities, skus, employees, overheads }) => {
+const ActivityManager: React.FC<ActivityManagerProps> = ({ activities, setActivities, skus, employees, overheads, currency }) => {
   const [newAct, setNewAct] = useState<Partial<Activity>>({ 
     name: '', 
     driver: 'Labor Hours',
@@ -219,7 +220,7 @@ const ActivityManager: React.FC<ActivityManagerProps> = ({ activities, setActivi
                     
                     <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
                        <div className="text-[8px] font-black text-slate-400 uppercase mb-1">Biomass Adjusted Cost Load</div>
-                       <div className="text-xl font-mono font-black text-slate-900">UGX {Math.round(act.effectiveRate).toLocaleString()} / unit</div>
+                        <div className="text-xl font-mono font-black text-slate-900">{currency?.format ? currency.format(act.effectiveRate) : Math.round(act.effectiveRate).toLocaleString()} / unit</div>
                     </div>
                   </>
                 )}

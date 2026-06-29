@@ -11,6 +11,7 @@ interface OverheadManagerProps {
   skus: SKU[];
   transactions: Transaction[];
   setTransactions: (txs: Transaction[]) => void;
+  currency?: { active: any; format: (v: number) => string; formatCompact?: (v: number) => string };
 }
 
 // Added 'Water' to ENERGY_OPTIONS to match the type update and allow utility tracking
@@ -25,7 +26,7 @@ const ALLOCATION_METHODS: { label: string; value: AllocationMethod }[] = [
 const PRODUCTION_DAYS_PER_MONTH = 26;
 const COLORS = ['#4f46e5', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#64748b'];
 
-const OverheadManager: React.FC<OverheadManagerProps> = ({ overheads, setOverheads, activities, skus, transactions, setTransactions }) => {
+const OverheadManager: React.FC<OverheadManagerProps> = ({ overheads, setOverheads, activities, skus, transactions, setTransactions, currency }) => {
   const [activeSubTab, setActiveSubTab] = useState<'Registry' | 'EnergyPortfolio'>('Registry');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Overhead> | null>(null);
@@ -133,7 +134,7 @@ const OverheadManager: React.FC<OverheadManagerProps> = ({ overheads, setOverhea
                           </Pie>
                           <Tooltip 
                             contentStyle={{borderRadius: '1.5rem', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'}}
-                            formatter={(v: any) => [`UGX ${v.toLocaleString()}`, 'Monthly Spend']}
+                            formatter={(v: any) => [currency?.format ? currency.format(Number(v) || 0) : Number(v).toLocaleString(), 'Monthly Spend']}
                           />
                        </PieChart>
                     </ResponsiveContainer>
@@ -141,11 +142,11 @@ const OverheadManager: React.FC<OverheadManagerProps> = ({ overheads, setOverhea
                  <div className="grid grid-cols-2 gap-4 w-full mt-10">
                     <div className="bg-slate-50 p-6 rounded-3xl text-center">
                        <div className="text-[9px] font-black text-slate-400 uppercase mb-1">Portfolio Spend</div>
-                       <div className="text-lg font-mono font-black text-slate-900">UGX {Math.round(energyAuditData.totalEnergySpend).toLocaleString()}</div>
+                        <div className="text-lg font-mono font-black text-slate-900">{currency?.format ? currency.format(energyAuditData.totalEnergySpend) : Math.round(energyAuditData.totalEnergySpend).toLocaleString()}</div>
                     </div>
                     <div className="bg-indigo-50 p-6 rounded-3xl text-center">
                        <div className="text-[9px] font-black text-indigo-400 uppercase mb-1">Energy Intensity</div>
-                       <div className="text-lg font-mono font-black text-indigo-900">UGX {Math.round(energyAuditData.energyDensity).toLocaleString()} / pc</div>
+                        <div className="text-lg font-mono font-black text-indigo-900">{currency?.format ? currency.format(energyAuditData.energyDensity) : Math.round(energyAuditData.energyDensity).toLocaleString()} / pc</div>
                     </div>
                  </div>
               </div>
@@ -162,7 +163,7 @@ const OverheadManager: React.FC<OverheadManagerProps> = ({ overheads, setOverhea
                                <span className="font-black text-xs uppercase tracking-widest">{item.name}</span>
                             </div>
                             <div className="text-right">
-                               <div className="text-sm font-mono font-black">UGX {item.value.toLocaleString()}</div>
+                               <div className="text-sm font-mono font-black">{currency?.format ? currency.format(item.value) : item.value.toLocaleString()}</div>
                                <div className="text-[8px] text-slate-500 uppercase font-bold">{((item.value / energyAuditData.totalEnergySpend) * 100).toFixed(1)}% of Mix</div>
                             </div>
                          </div>
@@ -200,7 +201,7 @@ const OverheadManager: React.FC<OverheadManagerProps> = ({ overheads, setOverhea
                 </select>
               </div>
               <div className="lg:col-span-2">
-                <label className="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Amount (UGX)</label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Amount ({currency?.active || 'UGX'})</label>
                 <input type="number" className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 text-sm font-mono font-bold" value={newOh.amount || ''} onChange={e => setNewOh({ ...newOh, amount: parseFloat(e.target.value) })} />
               </div>
               <div className="lg:col-span-2">
@@ -227,7 +228,7 @@ const OverheadManager: React.FC<OverheadManagerProps> = ({ overheads, setOverhea
                    <button onClick={() => setOverheads(overheads.filter(x => x.id !== oh.id))} className="text-slate-200 hover:text-rose-500">✕</button>
                 </div>
                 <h4 className="text-lg font-bold font-serif text-slate-900 mb-1 uppercase">{oh.name}</h4>
-                <div className="text-2xl font-mono font-black text-slate-900">UGX {calculateMonthly(oh).toLocaleString()}</div>
+                <div className="text-2xl font-mono font-black text-slate-900">{currency?.format ? currency.format(calculateMonthly(oh)) : calculateMonthly(oh).toLocaleString()}</div>
                 <div className="text-[8px] font-bold text-slate-400 uppercase mt-1">Monthly Burden Equivalent</div>
               </div>
             ))}

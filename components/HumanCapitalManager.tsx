@@ -117,7 +117,7 @@ const HumanCapitalManager: React.FC<HumanCapitalManagerProps> = ({
                   <thead>
                     <tr className="bg-slate-50 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b">
                       <th className="px-10 py-6">Staff Member</th>
-                      <th className="px-6 py-6 text-right">Gross (UGX)</th>
+                      <th className="px-6 py-6 text-right">Gross ({currency.active})</th>
                       <th className="px-6 py-6 text-right text-rose-500">PAYE Tax</th>
                       <th className="px-6 py-6 text-right text-indigo-500">NSSF (5%)</th>
                       <th className="px-10 py-6 text-right text-emerald-600">Net Pay</th>
@@ -185,7 +185,7 @@ const HumanCapitalManager: React.FC<HumanCapitalManagerProps> = ({
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Base Monthly Pay (UGX)</label>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Base Monthly Pay ({currency.active})</label>
                     <input type="number" className="w-full p-4 bg-slate-50 border-none rounded-2xl font-mono font-black" value={newEmp.salary || ''} onChange={e => setNewEmp({...newEmp, salary: parseFloat(e.target.value) || 0})} />
                   </div>
                </div>

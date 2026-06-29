@@ -5,11 +5,12 @@ import { Supplier } from '../types';
 interface SupplierManagerProps {
   suppliers: Supplier[];
   setSuppliers: (suppliers: Supplier[]) => void;
+   currency?: { active: any; format: (v: number) => string; formatCompact?: (v: number) => string };
 }
 
 const COMMON_CATEGORIES = ['Raw Materials', 'Packaging', 'Utilities', 'Equipment', 'Services', 'Others'];
 
-const SupplierManager: React.FC<SupplierManagerProps> = ({ suppliers, setSuppliers }) => {
+const SupplierManager: React.FC<SupplierManagerProps> = ({ suppliers, setSuppliers, currency }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingSupplierId, setEditingSupplierId] = useState<string | null>(null);
@@ -121,7 +122,7 @@ const SupplierManager: React.FC<SupplierManagerProps> = ({ suppliers, setSupplie
                   <input className="w-full p-4 bg-indigo-50/50 border-none rounded-2xl font-bold text-sm placeholder:text-indigo-200" value={newSupplier.paymentTerms} onChange={e => setNewSupplier({...newSupplier, paymentTerms: e.target.value})} placeholder="e.g. Net 30, Pay on Delivery, 15% Late Fee..." />
                </div>
                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Credit Limit (UGX)</label>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Credit Limit ({currency?.active || 'UGX'})</label>
                   <input type="number" className="w-full p-4 bg-slate-50 border-none rounded-2xl font-mono font-black" value={newSupplier.creditLimit || ''} onChange={e => setNewSupplier({...newSupplier, creditLimit: parseFloat(e.target.value) || 0})} />
                </div>
                <div className="flex gap-2">
@@ -161,7 +162,7 @@ const SupplierManager: React.FC<SupplierManagerProps> = ({ suppliers, setSupplie
                 <div className="pt-6 border-t border-slate-50 flex justify-between items-center">
                    <div className="flex flex-col">
                       <span className="text-[8px] font-black text-slate-300 uppercase">Balance Limit</span>
-                      <span className="text-[10px] font-mono font-black text-slate-600">UGX {sup.creditLimit.toLocaleString()}</span>
+                      <span className="text-[10px] font-mono font-black text-slate-600">{currency?.format ? currency.format(sup.creditLimit) : sup.creditLimit.toLocaleString()}</span>
                    </div>
                    <button onClick={() => handleStartEdit(sup)} className="px-5 py-2 bg-slate-900 text-white rounded-xl text-[9px] font-black uppercase shadow-sm hover:bg-indigo-600 transition-colors">Edit Master</button>
                 </div>
