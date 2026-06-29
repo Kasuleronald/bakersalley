@@ -46,6 +46,16 @@
 				"add",
 				"-A"
 			]
+		},
+		{
+			"label": "git-commit-restore-point",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"commit",
+				"-m",
+				"chore: restore point before tenant-rbac implementation"
+			]
 		}
 	]
 }
