@@ -278,8 +278,8 @@ const CreditorManager: React.FC<CreditorManagerProps> = ({ invoices, setInvoices
                        <option value="Short-term">Short-Term (Current Liability)</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Current Magnitude (UGX)</label>
+                           <div>
+                              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Current Magnitude ({currency.active})</label>
                     <input type="number" className="w-full p-4 bg-slate-50 border-none rounded-2xl font-mono font-black text-lg" value={newLoan.balance || ''} onChange={e => setNewLoan({...newLoan, balance: parseFloat(e.target.value) || 0})} />
                   </div>
                   <div className="flex gap-2">

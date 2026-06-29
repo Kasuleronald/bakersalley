@@ -251,7 +251,7 @@ const CostAccountant: React.FC<CostAccountantProps> = ({ skus, ingredients, acti
                         <div>
                           <label className="block text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-2">1. Monthly Fixed Costs</label>
                           <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-300">UGX</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-300">{currency.active}</span>
                             <input 
                                 type="number" 
                                 className="w-full pl-12 pr-5 py-4 bg-white border border-indigo-100 rounded-2xl font-mono font-black text-lg text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
@@ -263,7 +263,7 @@ const CostAccountant: React.FC<CostAccountantProps> = ({ skus, ingredients, acti
                         <div>
                           <label className="block text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-2">2. Unit Selling Price</label>
                           <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-300">UGX</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-300">{currency.active}</span>
                             <input 
                                 type="number" 
                                 className="w-full pl-12 pr-5 py-4 bg-white border border-indigo-100 rounded-2xl font-mono font-black text-lg text-indigo-900 outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
@@ -275,7 +275,7 @@ const CostAccountant: React.FC<CostAccountantProps> = ({ skus, ingredients, acti
                         <div>
                           <label className="block text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-2">3. Unit Variable Cost</label>
                           <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-300">UGX</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-300">{currency.active}</span>
                             <input 
                                 type="number" 
                                 className="w-full pl-12 pr-5 py-4 bg-white border border-indigo-100 rounded-2xl font-mono font-black text-lg text-rose-600 outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"

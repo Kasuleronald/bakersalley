@@ -5,7 +5,7 @@ import { DEPARTMENTS } from '../constants';
 
 interface AuthorityHubProps {
   users: User[];
-  currency: { format: (v: number) => string };
+  currency: { active?: any; format: (v: number) => string };
 }
 
 const AuthorityHub: React.FC<AuthorityHubProps> = ({ users, currency }) => {
@@ -59,8 +59,8 @@ const AuthorityHub: React.FC<AuthorityHubProps> = ({ users, currency }) => {
                     {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                  </select>
               </div>
-              <div>
-                 <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Authority Limit (UGX)</label>
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Authority Limit ({currency.active || 'UGX'})</label>
                  <input type="number" className="w-full p-4 bg-slate-50 border-none rounded-2xl font-mono font-black" value={newUser.authorityLimit || ''} onChange={e => setNewUser({...newUser, authorityLimit: parseFloat(e.target.value) || 0})} />
               </div>
            </div>

@@ -9,7 +9,7 @@ interface BranchCommandCenterProps {
   setOutletStocks: (os: OutletStock[]) => void;
   movements: InventoryMovement[];
   setMovements: (movs: InventoryMovement[]) => void;
-  currency: { format: (v: number) => string };
+   currency: { active?: any; format: (v: number) => string };
 }
 
 /**
@@ -192,7 +192,7 @@ const BranchCommandCenter: React.FC<BranchCommandCenterProps> = ({ skus, outlets
                  <div className="flex justify-between py-1"><span>Slice Wholemeal x2</span><span>9,600</span></div>
               </div>
               <div className="flex justify-between font-black text-base">
-                 <span>TOTAL (UGX)</span>
+                 <span>TOTAL ({currency.active || 'UGX'})</span>
                  <span>54,600</span>
               </div>
               <div className="text-center pt-10 opacity-40">

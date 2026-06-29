@@ -167,8 +167,8 @@ const AssetRegister: React.FC<AssetRegisterProps> = ({ assets, setAssets, transa
                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Asset Name</label>
                  <input className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm" value={newAsset.name} onChange={e => setNewAsset({...newAsset, name: e.target.value})} placeholder="e.g. Rotary Oven B" />
               </div>
-              <div>
-                 <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Purchase Price (UGX)</label>
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Purchase Price ({currency.active})</label>
                  <input type="number" className="w-full p-4 bg-slate-50 border-none rounded-2xl font-mono font-bold" value={newAsset.purchasePrice || ''} onChange={e => setNewAsset({...newAsset, purchasePrice: parseFloat(e.target.value) || 0})} />
               </div>
               <div>
@@ -206,8 +206,8 @@ const AssetRegister: React.FC<AssetRegisterProps> = ({ assets, setAssets, transa
                        <option value="Upgrade">Engineering Upgrade</option>
                     </select>
                  </div>
-                 <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Repair Cost (UGX)</label>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Repair Cost ({currency.active})</label>
                     <input 
                       type="number" 
                       className="w-full p-4 bg-slate-50 border-none rounded-2xl font-mono font-black text-lg" 
