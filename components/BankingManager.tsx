@@ -137,8 +137,8 @@ const BankingManager: React.FC<BankingManagerProps> = ({ transactions, setTransa
                    </select>
                 </div>
               )}
-              <div>
-                 <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Magnitude (UGX)</label>
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Magnitude ({currency.active})</label>
                  <input type="number" className="w-full p-4 bg-slate-50 rounded-2xl font-mono font-black text-lg" value={newTx.amount || ''} onChange={e => setNewTx({...newTx, amount: parseFloat(e.target.value) || 0})} />
               </div>
               <div className="md:col-span-1">
@@ -176,7 +176,7 @@ const BankingManager: React.FC<BankingManagerProps> = ({ transactions, setTransa
                     <span className="bg-slate-100 px-3 py-1 rounded-lg text-[9px] font-black text-slate-600 uppercase">{tx.account}</span>
                   </td>
                   <td className={`px-10 py-5 text-right font-mono font-black text-sm ${tx.type === 'Credit' ? 'text-emerald-600' : 'text-rose-500'}`}>
-                    {tx.type === 'Credit' ? '+' : '-'}{tx.amount.toLocaleString()}
+                    {tx.type === 'Credit' ? '+' : '-'}{currency.format(tx.amount)}
                   </td>
                 </tr>
               ))}
