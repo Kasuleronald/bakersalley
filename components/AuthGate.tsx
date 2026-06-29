@@ -100,27 +100,27 @@ if (matched) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#faf9f6] p-4">
-      <div className="max-w-md w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-coffee-50">
-        <div className="bg-coffee-900 p-10 text-center text-white relative">
+    <div className="min-h-screen flex items-center justify-center app-shell p-4">
+      <div className="max-w-md w-full app-panel rounded-[3rem] overflow-hidden">
+        <div className="bg-[linear-gradient(135deg,#533f35_0%,#3d2d26_100%)] p-10 text-center text-white relative">
           <div className="text-5xl mb-4">🥐</div>
           <h1 className="text-3xl font-bold font-serif mb-1 tracking-tight">BakersAlley 3.1</h1>
           <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Enterprise Governance Active</p>
         </div>
         
         <div className="p-10">
-          <div className="flex bg-stone-100 p-1 rounded-2xl mb-8">
+          <div className="flex app-tab-group mb-8">
             <button 
               type="button"
               onClick={() => { setView('Login'); setError(null); }} 
-              className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${view === 'Login' ? 'bg-white shadow-md text-coffee-900' : 'text-stone-400'}`}
+              className={`flex-1 app-tab ${view === 'Login' ? 'is-active' : 'text-bakery-400'}`}
             >
               LOGIN
             </button>
             <button 
               type="button"
               onClick={() => { setView('Register'); setError(null); }} 
-              className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${view === 'Register' ? 'bg-white shadow-md text-coffee-900' : 'text-stone-400'}`}
+              className={`flex-1 app-tab ${view === 'Register' ? 'is-active' : 'text-bakery-400'}`}
             >
               SUBSCRIBE
             </button>
@@ -129,9 +129,9 @@ if (matched) {
           <form onSubmit={handleAuth} className="space-y-4">
             {view === 'Register' && (
               <div className="space-y-1">
-                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-4">Authorized Entity Name</label>
+                <label className="app-label ml-4">Authorized Entity Name</label>
                 <input 
-                  className="w-full px-5 py-4 rounded-2xl bg-stone-50 border border-stone-100 font-bold text-sm outline-none focus:ring-2 focus:ring-coffee-500 transition-all" 
+                  className="app-input" 
                   value={name} 
                   onChange={e => setName(e.target.value)} 
                   placeholder="Full Business/Staff Name" 
@@ -140,9 +140,9 @@ if (matched) {
             )}
             
             <div className="space-y-1">
-              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-4">User Identity</label>
+              <label className="app-label ml-4">User Identity</label>
               <input 
-                className="w-full px-5 py-4 rounded-2xl bg-stone-50 border border-stone-100 font-bold text-sm outline-none focus:ring-2 focus:ring-coffee-500 transition-all" 
+                className="app-input" 
                 value={identity} 
                 onChange={e => setIdentity(e.target.value)} 
                 placeholder="Email or Identity ID" 
@@ -150,11 +150,11 @@ if (matched) {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-4">Password</label>
+              <label className="app-label ml-4">Password</label>
               <input 
                 type="password" 
                 disabled={isAuthenticating} 
-                className="w-full px-5 py-4 rounded-2xl bg-stone-50 border border-stone-100 font-bold text-sm outline-none focus:ring-2 focus:ring-coffee-500 transition-all" 
+                className="app-input" 
                 value={password} 
                 onChange={e => setPassword(e.target.value)} 
                 placeholder="••••••••" 
@@ -163,7 +163,7 @@ if (matched) {
 
             {view === 'Register' && (
               <div className="space-y-4 pt-2">
-                <div className="flex items-start gap-3 p-5 bg-indigo-50/50 rounded-[2rem] border border-indigo-100">
+                <div className="flex items-start gap-3 p-5 rounded-[2rem] border border-bakery-100 bg-bakery-50/70">
                   <input 
                     type="checkbox" 
                     id="privacy-check" 
@@ -171,14 +171,14 @@ if (matched) {
                     onChange={e => setHasConsented(e.target.checked)}
                     className="mt-1 w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
-                  <label htmlFor="privacy-check" className="text-[9px] text-indigo-900 leading-relaxed font-bold uppercase cursor-pointer">
+                  <label htmlFor="privacy-check" className="text-[9px] text-bakery-900 leading-relaxed font-bold uppercase cursor-pointer">
                      {consentText}
                   </label>
                 </div>
                 <button 
                   type="button"
                   onClick={() => setShowTermsModal(true)}
-                  className="text-[9px] font-black text-indigo-600 uppercase underline tracking-widest block w-full text-center"
+                  className="text-[9px] font-black text-bakery-700 uppercase underline tracking-widest block w-full text-center"
                 >
                   Read Full Terms & Conditions
                 </button>
@@ -203,17 +203,17 @@ if (matched) {
 
             <button 
               disabled={isAuthenticating}
-              className={`w-full bg-coffee-900 text-white py-5 rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-xl transition-all mt-4 ${isAuthenticating ? 'opacity-50 animate-pulse' : 'hover:bg-black active:scale-95'}`}
+              className={`w-full app-button app-button-primary justify-center py-5 mt-4 ${isAuthenticating ? 'opacity-50 animate-pulse cursor-not-allowed' : ''}`}
             >
               {isAuthenticating ? 'Verifying Ledger Access...' : view === 'Login' ? 'Access Secure Ledger' : 'Confirm Subscription'}
             </button>
           </form>
           
           <div className="mt-10 pt-10 border-t border-stone-100 text-center">
-             <div className="text-[8px] font-black text-slate-300 uppercase tracking-[0.3em] mb-3">Statutory Guardrail Profile</div>
+             <div className="app-shell-title mb-3">Statutory Guardrail Profile</div>
              <div className="flex justify-center gap-2 flex-wrap">
                 {(taxConfig?.activeJurisdictions || ['UG_DPA_2019', 'GLOBAL_ISO_9001']).map(id => (
-                    <span key={id} className="bg-slate-100 text-slate-400 px-2 py-0.5 rounded text-[7px] font-bold uppercase tracking-tighter border border-slate-200">
+                    <span key={id} className="app-pill">
                         {id.replace(/_/g, ' ')} Active
                     </span>
                 ))}
@@ -224,9 +224,9 @@ if (matched) {
 
       {/* TERMS MODAL */}
       {showTermsModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/80 backdrop-blur-xl p-6">
-          <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-softFade">
-            <div className="bg-coffee-900 p-8 text-white flex justify-between items-center">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/70 backdrop-blur-xl p-6">
+          <div className="app-panel w-full max-w-2xl rounded-[3rem] flex flex-col max-h-[85vh] overflow-hidden animate-softFade">
+            <div className="bg-[linear-gradient(135deg,#533f35_0%,#3d2d26_100%)] p-8 text-white flex justify-between items-center">
               <div>
                 <h3 className="text-xl font-bold font-serif">Terms & Conditions</h3>
                 <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mt-1">Industrial ERP Framework Agreement</p>
@@ -241,7 +241,7 @@ if (matched) {
             <div className="p-8 border-t border-slate-50 bg-slate-50 flex justify-end">
                <button 
                 onClick={() => { setHasConsented(true); setShowTermsModal(false); setError(null); }}
-                className="bg-indigo-900 text-white px-12 py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg hover:bg-black transition-all"
+                className="app-button app-button-primary px-12 py-4"
                >
                  I Accept & Understand
                </button>

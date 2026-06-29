@@ -88,7 +88,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#faf9f6] overflow-x-hidden relative">
+    <div className="min-h-screen flex flex-col md:flex-row app-shell overflow-x-hidden relative">
       {/* Swipe Handle for Mobile */}
       {!isMobileMenuOpen && (
         <div 
@@ -112,19 +112,19 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
       )}
 
       {/* Mobile Header */}
-      <header className="md:hidden glass fixed top-0 left-0 right-0 h-16 border-b border-bakery-100 z-[80] px-4 flex items-center justify-between">
-        <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-bakery-800 bg-bakery-50 rounded-xl shadow-sm active:scale-95 transition-all">
+      <header className="md:hidden app-panel fixed top-0 left-0 right-0 h-16 z-[80] px-4 flex items-center justify-between">
+        <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-bakery-800 bg-white/80 rounded-xl shadow-sm active:scale-95 transition-all border border-bakery-100">
            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>
         </button>
         <div className="text-sm font-black font-serif uppercase tracking-tight text-bakery-900">BakersAlley</div>
         <div className="flex items-center gap-3">
-           <button onClick={onOpenSearch} className="p-2 text-bakery-400">🔍</button>
+          <button onClick={onOpenSearch} className="p-2 text-bakery-400">🔍</button>
            <div className={`w-2 h-2 rounded-full ${connState === 'Online' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500'}`}></div>
         </div>
       </header>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-bakery-100 z-[80] px-6 py-3 flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 app-panel z-[80] px-6 py-3 flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         {[
           { id: 'dashboard', label: 'Home', icon: '🏠' },
           { id: 'snop', label: 'Ops', icon: '⚡' },
@@ -165,7 +165,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
       : isMobileMenuOpen ? 0 : '-100%',
     transition: { type: 'spring', damping: 25, stiffness: 200 }
   }}
-  className={`fixed top-0 left-0 bottom-0 w-64 bg-bakery-950 text-white z-[90] md:relative md:translate-x-0`}
+  className="fixed top-0 left-0 bottom-0 w-64 bg-[linear-gradient(180deg,#2c1f1a_0%,#3b2b24_100%)] text-white z-[90] md:relative md:translate-x-0 shadow-[0_30px_80px_-24px_rgba(0,0,0,0.4)]"
 >
         <div className="flex flex-col h-full">
           <div className="p-8 space-y-4">
@@ -178,11 +178,11 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-hide">
               {navGroups.map(group => (
                 <div key={group.label} className="space-y-1">
-                  <button onClick={() => setExpandedGroup(expandedGroup === group.label ? null : group.label)} className="w-full flex items-center justify-between px-4 py-2 text-[9px] font-black text-bakery-400 uppercase tracking-widest hover:text-harvest-400 transition-colors">{group.label}</button>
+                  <button onClick={() => setExpandedGroup(expandedGroup === group.label ? null : group.label)} className="w-full flex items-center justify-between px-4 py-2 app-nav-group hover:text-harvest-400 transition-colors">{group.label}</button>
                   {expandedGroup === group.label && (
                     <div className="space-y-1 animate-softFade">
                       {group.items.map(item => (
-                        <button key={item.id} onClick={() => handleTabChange(item.id)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-xs font-bold ${activeTab === item.id ? 'bg-harvest-500 text-bakery-950 shadow-lg' : 'text-bakery-200 hover:bg-white/5'}`}>{item.icon} {t(item.translationKey)}</button>
+                        <button key={item.id} onClick={() => handleTabChange(item.id)} className={`app-side-tab ${activeTab === item.id ? 'is-active' : 'text-bakery-200 hover:bg-white/5'}`}>{item.icon} {t(item.translationKey)}</button>
                       ))}
                     </div>
                   )}
@@ -190,7 +190,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
               ))}
           </nav>
           <div className="p-6 border-t border-white/5">
-             <button onClick={onLogout} className="w-full py-3 bg-white/5 hover:bg-rose-900/40 text-bakery-300 hover:text-white rounded-xl text-[10px] font-black uppercase transition-all">Sign Out</button>
+             <button onClick={onLogout} className="w-full app-button app-button-secondary justify-center">Sign Out</button>
           </div>
         </div>
       </motion.aside>
@@ -199,19 +199,19 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
         <div className="max-w-6xl mx-auto p-4 md:p-12">
           {/* Main Content Header */}
           <div className="hidden md:flex justify-between items-center mb-10">
-            <div className="text-[9px] font-black text-bakery-300 uppercase tracking-[0.3em]">Institutional Ledger / Enterprise v3.2</div>
+            <div className="app-shell-title">Institutional Ledger / Enterprise v3.2</div>
             <div className="flex items-center gap-4">
               <button 
                 onClick={onOpenSearch} 
-                className="group flex items-center gap-3 px-6 py-2.5 bg-white border border-bakery-100 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-harvest-500 hover:shadow-lg transition-all"
+                className="group app-button app-button-secondary gap-3 px-6 py-2.5"
               >
                  <span className="opacity-40 group-hover:opacity-100 group-hover:text-harvest-600">🔍</span>
                  <span className="text-bakery-900">Quick Search</span>
                  <span className="px-1.5 py-0.5 bg-bakery-50 text-bakery-300 rounded-lg text-[8px]">⌘K</span>
               </button>
-              <div className="flex bg-bakery-100 p-1 rounded-xl border border-bakery-200">
+              <div className="flex app-tab-group">
                 {(['UGX', 'USD'] as CurrencyCode[]).map(code => (
-                   <button key={code} onClick={() => setActiveCurrency?.(code)} className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all ${activeCurrency === code ? 'bg-white text-bakery-950 shadow-sm' : 'text-bakery-400'}`}>{code}</button>
+                   <button key={code} onClick={() => setActiveCurrency?.(code)} className={`app-tab ${activeCurrency === code ? 'is-active' : 'text-bakery-400'}`}>{code}</button>
                 ))}
               </div>
             </div>

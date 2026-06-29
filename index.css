@@ -1,3 +1,224 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	:root {
+		color-scheme: light;
+		--app-bg: #faf7f2;
+		--app-bg-soft: #f4ede4;
+		--app-surface: rgba(255, 255, 255, 0.92);
+		--app-surface-strong: #ffffff;
+		--app-border: rgba(83, 63, 53, 0.12);
+		--app-ink: #231711;
+		--app-muted: #6e5a4d;
+		--app-accent: #a78261;
+		--app-accent-strong: #533f35;
+		--app-accent-soft: rgba(167, 130, 97, 0.14);
+	}
+
+	html {
+		font-family: 'DM Sans', Arial, sans-serif;
+		background: var(--app-bg);
+	}
+
+	body {
+		min-height: 100vh;
+		margin: 0;
+		color: var(--app-ink);
+		background:
+			radial-gradient(circle at top left, rgba(167, 130, 97, 0.14), transparent 28%),
+			radial-gradient(circle at bottom right, rgba(234, 179, 8, 0.10), transparent 24%),
+			linear-gradient(180deg, #fbf8f3 0%, #f6efe5 100%);
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	::selection {
+		background: var(--app-accent-strong);
+		color: #fff;
+	}
+
+	button,
+	input,
+	select,
+	textarea {
+		font: inherit;
+	}
+}
+
+@layer components {
+	.app-shell {
+		background:
+			radial-gradient(circle at top left, rgba(167, 130, 97, 0.14), transparent 28%),
+			radial-gradient(circle at bottom right, rgba(234, 179, 8, 0.10), transparent 24%),
+			linear-gradient(180deg, #fbf8f3 0%, #f6efe5 100%);
+	}
+
+	.app-panel {
+		background: var(--app-surface);
+		border: 1px solid var(--app-border);
+		box-shadow: 0 24px 80px -40px rgba(35, 23, 17, 0.35);
+		backdrop-filter: blur(18px);
+	}
+
+	.app-card {
+		background: var(--app-surface-strong);
+		border: 1px solid rgba(83, 63, 53, 0.08);
+		box-shadow: 0 18px 50px -34px rgba(35, 23, 17, 0.25);
+	}
+
+	.app-title {
+		font-family: 'Fraunces', Georgia, serif;
+		letter-spacing: -0.03em;
+		color: var(--app-ink);
+	}
+
+	.app-label {
+		display: block;
+		font-size: 0.65rem;
+		line-height: 1rem;
+		font-weight: 900;
+		letter-spacing: 0.24em;
+		text-transform: uppercase;
+		color: #8a786a;
+	}
+
+	.app-input {
+		width: 100%;
+		border-radius: 1.25rem;
+		border: 1px solid rgba(83, 63, 53, 0.10);
+		background: rgba(255, 255, 255, 0.96);
+		padding: 1rem 1.25rem;
+		font-size: 0.95rem;
+		font-weight: 600;
+		color: var(--app-ink);
+		outline: none;
+		transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, background-color 160ms ease;
+	}
+
+	.app-input::placeholder {
+		color: rgba(110, 90, 77, 0.55);
+	}
+
+	.app-input:focus {
+		border-color: rgba(167, 130, 97, 0.75);
+		box-shadow: 0 0 0 4px rgba(167, 130, 97, 0.14);
+		background: #fff;
+	}
+
+	.app-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 1.25rem;
+		padding: 0.95rem 1.25rem;
+		font-size: 0.72rem;
+		font-weight: 900;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+	}
+
+	.app-button:active {
+		transform: translateY(1px);
+	}
+
+	.app-button-primary {
+		background: var(--app-accent-strong);
+		color: #fff;
+		box-shadow: 0 18px 36px -20px rgba(35, 23, 17, 0.5);
+	}
+
+	.app-button-primary:hover {
+		background: #3d2d26;
+	}
+
+	.app-button-secondary {
+		background: rgba(255, 255, 255, 0.86);
+		color: var(--app-muted);
+		border: 1px solid rgba(83, 63, 53, 0.08);
+	}
+
+	.app-button-secondary:hover {
+		color: var(--app-ink);
+		background: #fff;
+	}
+
+	.app-tab-group {
+		background: rgba(83, 63, 53, 0.07);
+		border: 1px solid rgba(83, 63, 53, 0.08);
+		padding: 0.25rem;
+		border-radius: 1.25rem;
+	}
+
+	.app-tab {
+		border-radius: 1rem;
+		padding: 0.8rem 1rem;
+		font-size: 0.72rem;
+		font-weight: 900;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		transition: all 160ms ease;
+	}
+
+	.app-tab.is-active {
+		background: #fff;
+		color: var(--app-accent-strong);
+		box-shadow: 0 12px 24px -20px rgba(35, 23, 17, 0.5);
+	}
+
+	.app-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		border-radius: 9999px;
+		border: 1px solid rgba(83, 63, 53, 0.1);
+		background: rgba(255, 255, 255, 0.85);
+		padding: 0.4rem 0.7rem;
+		font-size: 0.68rem;
+		font-weight: 800;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--app-muted);
+	}
+
+	.app-nav-group {
+		font-size: 0.62rem;
+		font-weight: 900;
+		letter-spacing: 0.28em;
+		text-transform: uppercase;
+		color: rgba(255, 255, 255, 0.48);
+	}
+
+	.app-side-tab {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		border-radius: 0.95rem;
+		padding: 0.75rem 1rem;
+		font-size: 0.8rem;
+		font-weight: 700;
+		transition: background-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+	}
+
+	.app-side-tab:hover {
+		transform: translateX(2px);
+	}
+
+	.app-side-tab.is-active {
+		background: #eab308;
+		color: #2c1f1a;
+		box-shadow: 0 16px 36px -24px rgba(234, 179, 8, 0.7);
+	}
+
+	.app-shell-title {
+		font-size: 0.75rem;
+		font-weight: 900;
+		letter-spacing: 0.3em;
+		text-transform: uppercase;
+		color: rgba(83, 63, 53, 0.5);
+	}
+}
