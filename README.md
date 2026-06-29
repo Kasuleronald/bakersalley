@@ -22,6 +22,26 @@ Create a `.env` file in the root directory and add your Google Gemini API Key:
 API_KEY=your_gemini_api_key_here
 ```
 
+For backend hardening in PHP, configure these server environment variables:
+
+```env
+BAKERY_TOKEN_SECRET=replace_with_long_random_secret_min_32_chars
+BAKERY_API_KEY=replace_with_separate_api_key_for_read_endpoint
+BAKERY_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+BAKERY_LOGIN_MAX_ATTEMPTS=5
+BAKERY_LOGIN_WINDOW_SECONDS=900
+BAKERY_LOGIN_LOCKOUT_SECONDS=900
+BAKERY_BOOTSTRAP_ADMIN_PASSWORD=replace_with_strong_one_time_password
+BAKERY_BOOTSTRAP_ADMIN_IDENTITY=admin@bakery.com
+BAKERY_BOOTSTRAP_ADMIN_NAME=System Admin
+```
+
+Important:
+
+- Rotating `BAKERY_TOKEN_SECRET` invalidates all existing session tokens.
+- Do not keep real API keys in frontend code for production.
+- Restrict `BAKERY_ALLOWED_ORIGINS` to your known domains only.
+
 ### 4. Run the development server
 ```bash
 npm run dev
