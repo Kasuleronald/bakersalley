@@ -143,7 +143,7 @@ const OrderManager: React.FC<OrderManagerProps> = ({
                }} className="p-4 bg-slate-50 rounded-2xl text-left border border-transparent hover:border-indigo-500 hover:bg-indigo-50 transition-all group flex flex-col justify-between">
                   <div className="font-bold text-[11px] text-slate-800 uppercase truncate mb-1">{s.name}</div>
                   <div className="flex justify-between items-end">
-                    <span className="text-[8px] font-black text-slate-400">UGX {s.retailPrice}</span>
+                    <span className="text-[8px] font-black text-slate-400">{currency.format(s.retailPrice)}</span>
                     {cart.find(i => i.skuId === s.id) && <span className="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black">{cart.find(i => i.skuId === s.id)?.quantity}</span>}
                   </div>
                </button>

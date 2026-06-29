@@ -48,7 +48,7 @@ const RiskHub: React.FC<RiskHubProps> = ({ ingredients, assets, loans, invoices,
   const SCENARIOS = [
     { id: 'grid', label: 'Total Grid Failure', impact: -25, description: 'Simulates 72hrs on diesel backup + high fuel burn.' },
     { id: 'wheat', label: 'Flour Price Spike (30%)', impact: -15, description: 'Market surge in raw material costs.' },
-    { id: 'debtor', label: 'Wholesale Default', impact: -20, description: 'Simulates UGX 10M cash flow evaporation.' }
+      { id: 'debtor', label: 'Wholesale Default', impact: -20, description: 'Simulates a major cash flow evaporation event.' }
   ];
 
   const simulatedScore = useMemo(() => {

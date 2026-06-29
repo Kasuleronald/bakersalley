@@ -279,7 +279,7 @@ const ReconstructionHub: React.FC<ReconstructionHubProps> = ({
                       <div>
                         <h4 className="font-black text-[10px] text-slate-400 uppercase tracking-widest mb-1">{acc.label}</h4>
                         <div className="flex items-center gap-2">
-                           <span className="text-xs font-bold text-slate-300">UGX</span>
+                          <span className="text-xs font-bold text-slate-300">{currency.active}</span>
                            <input 
                             type="number" 
                             className="w-full bg-white border-none rounded-2xl p-4 text-xl font-mono font-black text-center shadow-sm outline-none focus:ring-1 focus:ring-indigo-500"

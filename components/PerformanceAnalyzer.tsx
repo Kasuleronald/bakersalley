@@ -19,12 +19,13 @@ interface PerformanceAnalyzerProps {
   skus: SKU[];
   productionLogs: ProductionLog[];
   ingredients: Ingredient[];
+  currency?: { active?: any; format: (v: number) => string; formatCompact?: (v: number) => string };
 }
 
 type Grain = 'Day' | 'Week' | 'Month' | 'Quarter' | 'Year';
 type ViewMode = 'Trend' | 'Comparison' | 'Production';
 
-const PerformanceAnalyzer: React.FC<PerformanceAnalyzerProps> = ({ sales, transactions, skus, productionLogs, ingredients }) => {
+const PerformanceAnalyzer: React.FC<PerformanceAnalyzerProps> = ({ sales, transactions, skus, productionLogs, ingredients, currency }) => {
   const [grain, setGrain] = useState<Grain>('Week');
   const [viewMode, setViewMode] = useState<ViewMode>('Trend');
   const [periodA, setPeriodA] = useState<string>('');
@@ -243,7 +244,7 @@ const PerformanceAnalyzer: React.FC<PerformanceAnalyzerProps> = ({ sales, transa
                  <BarChart data={aggregatedPeriods}>
                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                    <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold'}} />
-                   <YAxis axisLine={false} tickLine={false} tickFormatter={v => `UGX ${v/1000}k`} />
+                   <YAxis axisLine={false} tickLine={false} tickFormatter={v => currency?.formatCompact ? currency.formatCompact(v) : `${Math.round(v/1000)}k`} />
                    <Tooltip cursor={{fill: '#fcfaf7'}} contentStyle={{borderRadius: '1rem', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'}} />
                    <Legend verticalAlign="top" align="right" iconType="circle" />
                    <Bar name="Sales Revenue" dataKey="revenue" fill="#1e1b4b" radius={[4, 4, 0, 0]} />

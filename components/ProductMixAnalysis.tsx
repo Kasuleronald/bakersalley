@@ -183,7 +183,7 @@ const ProductMixAnalysis: React.FC<ProductMixAnalysisProps> = ({ skus, sales, in
                  <BarChart data={quadrantData} margin={{ bottom: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 800, fill: '#475569' }} interval={0} angle={-30} textAnchor="end" />
-                    <YAxis axisLine={false} tickLine={false} tickFormatter={v => `UGX ${v/1000}k`} />
+                    <YAxis axisLine={false} tickLine={false} tickFormatter={v => currency.format(Math.max(0, v))} />
                     <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '1.5rem', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} />
                     <Legend verticalAlign="top" align="right" height={36}/>
                     <Bar name="Material Component" dataKey="totalMatCost" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} />
