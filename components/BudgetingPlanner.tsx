@@ -8,9 +8,10 @@ interface BudgetingPlannerProps {
   transactions: Transaction[];
   sales: Sale[];
   accountGroups: AccountGroup[];
+  currency?: { active: any; format: (v: number) => string; formatCompact?: (v: number) => string };
 }
 
-const BudgetingPlanner: React.FC<BudgetingPlannerProps> = ({ budgets, setBudgets, transactions, sales, accountGroups }) => {
+const BudgetingPlanner: React.FC<BudgetingPlannerProps> = ({ budgets, setBudgets, transactions, sales, accountGroups, currency }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   
@@ -168,11 +169,11 @@ const BudgetingPlanner: React.FC<BudgetingPlannerProps> = ({ budgets, setBudgets
                            />
                         </td>
                         <td className="px-6 py-5 text-right font-mono font-bold text-slate-400 text-xs">
-                           UGX {d.actual.toLocaleString()}
+                           {currency?.format ? currency.format(d.actual) : d.actual.toLocaleString()}
                         </td>
                         <td className="px-8 py-5 text-right">
                            <div className={`text-xs font-mono font-bold ${isFavorable ? 'text-emerald-600' : 'text-red-600'}`}>
-                             {d.variance > 0 ? '+' : ''}{Math.round(d.variance).toLocaleString()}
+                             {d.variance > 0 ? '+' : ''}{currency?.format ? currency.format(Math.abs(d.variance)) : Math.round(Math.abs(d.variance)).toLocaleString()}
                            </div>
                            <div className="text-[8px] font-bold text-slate-300 uppercase">
                              {isFavorable ? 'Within Limit' : 'Over Spend'}
@@ -208,11 +209,11 @@ const BudgetingPlanner: React.FC<BudgetingPlannerProps> = ({ budgets, setBudgets
                  <div className="pt-6 border-t border-white/5 grid grid-cols-2 gap-4">
                     <div>
                        <span className="text-[8px] font-bold text-slate-500 uppercase block mb-1">Budget Total</span>
-                       <span className="text-sm font-mono font-bold">UGX {Math.round(totalBudgetedExpenses).toLocaleString()}</span>
+                      <span className="text-sm font-mono font-bold">{currency?.format ? currency.format(totalBudgetedExpenses) : Math.round(totalBudgetedExpenses).toLocaleString()}</span>
                     </div>
                     <div className="text-right">
                        <span className="text-[8px] font-bold text-slate-500 uppercase block mb-1">Actual Total</span>
-                       <span className="text-sm font-mono font-bold">UGX {Math.round(totalActualExpenses).toLocaleString()}</span>
+                      <span className="text-sm font-mono font-bold">{currency?.format ? currency.format(totalActualExpenses) : Math.round(totalActualExpenses).toLocaleString()}</span>
                     </div>
                  </div>
               </div>
