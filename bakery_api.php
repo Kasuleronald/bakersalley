@@ -140,6 +140,63 @@ function clear_login_rate_limit($path, $identity) {
     }
 }
 
+function user_has_bcrypt_hash($hash) {
+    return is_string($hash) && strpos($hash, '$2y$') === 0;
+}
+
+function save_db($path, $db) {
+    file_put_contents($path, json_encode($db, JSON_PRETTY_PRINT), LOCK_EX);
+}
+
+function call_gemini_proxy($apiKey, $model, $prompt, $systemInstruction = '', $responseMimeType = '') {
+    if (!$apiKey) {
+        return ["ok" => false, "status" => 500, "error" => "GEMINI_API_KEY is not configured on server"];
+    }
+
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/" . rawurlencode($model) . ":generateContent?key=" . rawurlencode($apiKey);
+
+    $payload = [
+        "contents" => [[
+            "parts" => [["text" => $prompt]]
+        ]]
+    ];
+
+    if ($systemInstruction) {
+        $payload["systemInstruction"] = [
+            "parts" => [["text" => $systemInstruction]]
+        ];
+    }
+
+    if ($responseMimeType) {
+        $payload["generationConfig"] = ["responseMimeType" => $responseMimeType];
+    }
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+
+    $responseBody = curl_exec($ch);
+    $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlErr = curl_error($ch);
+    curl_close($ch);
+
+    if ($responseBody === false) {
+        return ["ok" => false, "status" => 502, "error" => $curlErr ?: "Failed to call Gemini API"];
+    }
+
+    $decoded = json_decode($responseBody, true);
+    if ($httpCode >= 400) {
+        $errMsg = $decoded['error']['message'] ?? 'Gemini API error';
+        return ["ok" => false, "status" => 502, "error" => $errMsg];
+    }
+
+    $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '';
+    return ["ok" => true, "status" => 200, "text" => $text];
+}
+
 apply_cors();
 
 $TOKEN_SECRET = env_or_default('BAKERY_TOKEN_SECRET', null);
@@ -154,6 +211,7 @@ $API_KEY = env_or_default('BAKERY_API_KEY', $TOKEN_SECRET);
 $LOGIN_MAX_ATTEMPTS = (int)env_or_default('BAKERY_LOGIN_MAX_ATTEMPTS', '5');
 $LOGIN_WINDOW_SECONDS = (int)env_or_default('BAKERY_LOGIN_WINDOW_SECONDS', '900');
 $LOGIN_LOCKOUT_SECONDS = (int)env_or_default('BAKERY_LOGIN_LOCKOUT_SECONDS', '900');
+$GEMINI_API_KEY = env_or_default('GEMINI_API_KEY', null);
 
 $provided_key = $_SERVER['HTTP_X_BAKERY_KEY'] ?? $_GET['key'] ?? '';
 $auth_header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
@@ -197,6 +255,13 @@ if (!file_exists($DATA_FILE)) {
 $action = $_GET['action'] ?? '';
 
 switch($action) {
+    case 'ping':
+        if (!$provided_key || !hash_equals($API_KEY, $provided_key)) {
+            json_response(401, ["status" => "error", "message" => "Unauthorized"]);
+        }
+        json_response(200, ["status" => "ok", "time" => date('c')]);
+        break;
+
     case 'login':
         $raw_input = file_get_contents('php://input');
         $input = json_decode($raw_input, true);
@@ -228,7 +293,26 @@ switch($action) {
             }
         }
 
-        if ($user && password_verify($password, $user['passwordHash'])) {
+        $isAuthenticated = false;
+        if ($user) {
+            $hash = $user['passwordHash'] ?? '';
+            if (user_has_bcrypt_hash($hash)) {
+                $isAuthenticated = password_verify($password, $hash);
+            } else if (is_string($hash) && hash_equals($hash, $password)) {
+                $isAuthenticated = true;
+                foreach ($db['users'] as &$dbUser) {
+                    if (($dbUser['id'] ?? '') === ($user['id'] ?? '')) {
+                        $dbUser['passwordHash'] = password_hash($password, PASSWORD_BCRYPT);
+                        $user['passwordHash'] = $dbUser['passwordHash'];
+                        break;
+                    }
+                }
+                unset($dbUser);
+                save_db($DATA_FILE, $db);
+            }
+        }
+
+        if ($isAuthenticated) {
             $payload = [
                 "uid" => $user['id'],
                 "role" => $user['role'],
@@ -254,6 +338,74 @@ switch($action) {
             );
             json_response(401, ["status" => "error", "message" => "Invalid credentials"]);
         }
+        break;
+
+    case 'register':
+        $raw_input = file_get_contents('php://input');
+        $input = json_decode($raw_input, true);
+        $name = trim((string)($input['name'] ?? ''));
+        $identity = trim((string)($input['identity'] ?? ''));
+        $password = (string)($input['password'] ?? '');
+
+        if ($name === '' || $identity === '' || $password === '') {
+            json_response(400, ["status" => "error", "message" => "Name, identity, and password are required."]);
+        }
+        if (strlen($password) < 8) {
+            json_response(400, ["status" => "error", "message" => "Password must be at least 8 characters."]);
+        }
+
+        $db = json_decode(file_get_contents($DATA_FILE), true);
+        if (!isset($db['users']) || !is_array($db['users'])) {
+            $db['users'] = [];
+        }
+
+        foreach ($db['users'] as $u) {
+            if (strtolower((string)($u['identity'] ?? '')) === strtolower($identity)) {
+                json_response(409, ["status" => "error", "message" => "Identity already exists."]);
+            }
+        }
+
+        $newUser = [
+            "id" => "u-" . time() . "-" . mt_rand(1000, 9999),
+            "name" => $name,
+            "identity" => $identity,
+            "passwordHash" => password_hash($password, PASSWORD_BCRYPT),
+            "role" => "Staff",
+            "department" => "Administration",
+            "authorityLimit" => 0,
+            "mfaEnabled" => false,
+            "hasConsentedToPrivacy" => true
+        ];
+
+        $db['users'][] = $newUser;
+        save_db($DATA_FILE, $db);
+        unset($newUser['passwordHash']);
+        json_response(201, ["status" => "success", "user" => $newUser]);
+        break;
+
+    case 'ai_proxy':
+        $token_payload = verify_token($auth_header, $TOKEN_SECRET);
+        if (!$token_payload) {
+            json_response(403, ["status" => "error", "message" => "Session expired or invalid"]);
+        }
+
+        $raw_input = file_get_contents('php://input');
+        $input = json_decode($raw_input, true);
+        $prompt = trim((string)($input['prompt'] ?? ''));
+        $model = trim((string)($input['model'] ?? 'gemini-2.0-flash'));
+        $responseMimeType = trim((string)($input['responseMimeType'] ?? ''));
+        $systemInstruction = trim((string)($input['systemInstruction'] ?? ''));
+
+        if ($prompt === '') {
+            json_response(400, ["status" => "error", "message" => "Prompt is required"]);
+        }
+
+        $aiResult = call_gemini_proxy($GEMINI_API_KEY, $model, $prompt, $systemInstruction, $responseMimeType);
+        if (!$aiResult['ok']) {
+            json_response($aiResult['status'], ["status" => "error", "message" => $aiResult['error']]);
+        }
+
+        json_response(200, ["status" => "success", "text" => $aiResult['text']]);
         break;
 
     case 'read':

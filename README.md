@@ -17,10 +17,7 @@ npm install
 ```
 
 ### 3. Setup Environment Variables
-Create a `.env` file in the root directory and add your Google Gemini API Key:
-```env
-API_KEY=your_gemini_api_key_here
-```
+For secure production behavior, configure Gemini and auth secrets on the backend server (not in frontend code):
 
 For backend hardening in PHP, configure these server environment variables:
 
@@ -34,12 +31,13 @@ BAKERY_LOGIN_LOCKOUT_SECONDS=900
 BAKERY_BOOTSTRAP_ADMIN_PASSWORD=replace_with_strong_one_time_password
 BAKERY_BOOTSTRAP_ADMIN_IDENTITY=admin@bakery.com
 BAKERY_BOOTSTRAP_ADMIN_NAME=System Admin
+GEMINI_API_KEY=your_server_side_gemini_api_key
 ```
 
 Important:
 
 - Rotating `BAKERY_TOKEN_SECRET` invalidates all existing session tokens.
-- Do not keep real API keys in frontend code for production.
+- Frontend AI requests are proxied through backend `action=ai_proxy`; no client API key is required.
 - Restrict `BAKERY_ALLOWED_ORIGINS` to your known domains only.
 
 ### 4. Run the development server

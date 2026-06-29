@@ -47,10 +47,10 @@ import { apiClient } from './services/apiClient';
 
 const App: React.FC = () => {
 
-  // ── Session: restore from localStorage on load ──────────────────────────
+  // ── Session: restore from sessionStorage on load ────────────────────────
   const [session, setSessionState] = useState<AuthSession>(() => {
     try {
-      const saved = localStorage.getItem('bakersalley_session');
+      const saved = sessionStorage.getItem('bakersalley_session');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed?.user) return parsed;
@@ -62,9 +62,9 @@ const App: React.FC = () => {
   const setSession = (newSession: AuthSession) => {
     setSessionState(newSession);
     if (newSession.user) {
-      localStorage.setItem('bakersalley_session', JSON.stringify(newSession));
+      sessionStorage.setItem('bakersalley_session', JSON.stringify(newSession));
     } else {
-      localStorage.removeItem('bakersalley_session');
+      sessionStorage.removeItem('bakersalley_session');
     }
   };
 
@@ -77,7 +77,7 @@ const App: React.FC = () => {
     const resetTimer = () => {
       clearTimeout(inactivityTimer);
       inactivityTimer = setTimeout(() => {
-        localStorage.removeItem('bakersalley_session');
+        sessionStorage.removeItem('bakersalley_session');
         setSessionState({ user: null, token: null });
       }, 5 * 60 * 1000); // 5 minutes
     };
@@ -96,7 +96,6 @@ const App: React.FC = () => {
   const [activeCurrency, setActiveCurrency] = useState<CurrencyCode>('UGX');
   const [activeLanguage, setActiveLanguage] = useState<LanguageCode>('EN');
   const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('Enterprise');
-  const [hasApiKey, setHasApiKey] = useState<boolean>(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showFeaturePortal, setShowFeaturePortal] = useState(false);
 
@@ -151,10 +150,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const init = async () => {
-      if (window.aistudio) {
-        const selected = await window.aistudio.hasSelectedApiKey();
-        setHasApiKey(selected);
-      }
       const db = await apiClient.getDb();
       if (db && Object.keys(db).length > 0) {
         if (db.taxConfig) setTaxConfig(db.taxConfig);
@@ -224,13 +219,6 @@ const App: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  const handleSelectKey = async () => {
-    if (window.aistudio) {
-      await window.aistudio.openSelectKey();
-      setHasApiKey(true);
-    }
-  };
 
   useEffect(() => {
     const saveData = async () => {
@@ -364,26 +352,6 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
-    if (!hasApiKey) {
-      return (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-8 animate-fadeIn">
-          <div className="w-24 h-24 bg-indigo-900 text-amber-400 rounded-[2.5rem] flex items-center justify-center text-5xl shadow-2xl">🔑</div>
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold font-serif text-slate-900 uppercase">SaaS Deployment Activation</h2>
-            <p className="text-slate-500 max-w-md mx-auto">
-              Please activate your subscription layer by selecting a valid strategic API key.
-            </p>
-          </div>
-          <button
-            onClick={handleSelectKey}
-            className="px-12 py-5 bg-indigo-900 text-white rounded-[2rem] font-black uppercase text-sm tracking-widest shadow-xl hover:bg-black transition-all active:scale-95"
-          >
-            Select Strategic Key
-          </button>
-        </div>
-      );
-    }
-
     switch (activeTab) {
       case 'dashboard': return <Dashboard cashOnHand={1000000} totalRevenue={5000000} currency={currencyConfig} onNavigate={setActiveTab} activeLanguage={activeLanguage} />;
       case 'mgmt-accountant': return <ManagementAccountant {...commonProps} />;
@@ -417,8 +385,7 @@ const App: React.FC = () => {
     return (
       <AuthGate
         session={session}
-        users={users}
-        onLogin={(user) => setSession({ user, token: 'local' })}
+        onLogin={(user, token) => setSession({ user, token })}
         onVerifyMfa={() => {}}
         onRegister={(newUser) => setUsers([...users, newUser])}
         taxConfig={taxConfig}

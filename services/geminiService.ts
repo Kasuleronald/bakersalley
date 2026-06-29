@@ -9,19 +9,12 @@ const executeWithRetry = async <T>(fn: (ai: GoogleGenAI) => Promise<T>, maxRetri
   let lastError: any;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: '' });
       return await fn(ai);
     } catch (error: any) {
       lastError = error;
       const errorMsg = error?.message || "";
       const isRetryable = errorMsg.includes("503") || errorMsg.includes("429") || errorMsg.includes("overloaded") || errorMsg.includes("rate limit");
-      
-      if (errorMsg.includes("Requested entity was not found")) {
-        if (window.aistudio) {
-          window.aistudio.openSelectKey();
-        }
-        return null;
-      }
 
       if (isRetryable && attempt < maxRetries - 1) {
         const delay = initialDelay * Math.pow(2, attempt);

@@ -1,13 +1,4 @@
 
-declare global {
-  interface Window {
-    aistudio: {
-      hasSelectedApiKey: () => Promise<boolean>;
-      openSelectKey: () => Promise<void>;
-    };
-  }
-}
-
 export type DepartmentName = 'Administration' | 'Production' | 'Distribution & Logistics' | 'Quality Assurance' | 'R&D' | 'Sanitation' | 'Welfare' | 'Sales and Marketing' | 'Stores' | 'Finance' | 'SuperAdmin' | 'Security' | 'Board of Directors';
 export type CurrencyCode = 'UGX' | 'USD' | 'EUR' | 'KES' | 'GBP';
 export type LanguageCode = 'EN' | 'SW' | 'FR' | 'AR';
@@ -222,7 +213,7 @@ export interface User {
   id: string;
   name: string;
   identity: string;
-  passwordHash: string;
+  passwordHash?: string;
   department: DepartmentName;
   role: string;
   mfaEnabled: boolean;

@@ -20,7 +20,15 @@ class ApiClient {
   }
 
   private getToken(): string | null {
-    return localStorage.getItem(AUTH_KEY);
+    return sessionStorage.getItem(AUTH_KEY);
+  }
+
+  private setToken(token: string | null): void {
+    if (token) {
+      sessionStorage.setItem(AUTH_KEY, token);
+      return;
+    }
+    sessionStorage.removeItem(AUTH_KEY);
   }
 
   private encryptData(data: any): string {
@@ -51,13 +59,67 @@ class ApiClient {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem(AUTH_KEY, data.token);
+        this.setToken(data.token);
         return data;
       }
     } catch (e) {
       console.error("Login request failed:", e);
     }
     return null;
+  }
+
+  async register(payload: { name: string; identity: string; password: string }): Promise<{user: User} | null> {
+    const config = this.getCloudConfig();
+    if (!config?.url) return null;
+
+    try {
+      const response = await fetch(`${config.url}?action=register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      }
+    } catch (e) {
+      console.error("Registration request failed:", e);
+    }
+
+    return null;
+  }
+
+  async generateAiContent(params: {
+    prompt: string;
+    model?: string;
+    responseMimeType?: string;
+    systemInstruction?: string;
+  }): Promise<string | null> {
+    const config = this.getCloudConfig();
+    const token = this.getToken();
+    if (!config?.url || !token) return null;
+
+    try {
+      const response = await fetch(`${config.url}?action=ai_proxy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify(params)
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+      return data?.text || null;
+    } catch (e) {
+      console.error("AI proxy request failed:", e);
+      return null;
+    }
   }
 
   async getDb(): Promise<any> {

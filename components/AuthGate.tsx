@@ -1,17 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { User, AuthSession, TaxConfig } from '../types';
 import { COMPLIANCE_DEFINITIONS, TERMS_AND_CONDITIONS } from '../constants';
+import { apiClient } from '../services/apiClient';
 
 interface AuthGateProps {
   session: AuthSession;
-  onLogin: (user: User) => void;
+  onLogin: (user: User, token: string) => void;
   onVerifyMfa: () => void;
-  users: User[];
   onRegister: (user: User) => void;
   taxConfig?: TaxConfig;
 }
 
-const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, onRegister, taxConfig }) => {
+const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, onRegister, taxConfig }) => {
   const [view, setView] = useState<'Login' | 'Register'>('Login');
   const [identity, setIdentity] = useState('');
   const [name, setName] = useState('');
@@ -46,18 +46,14 @@ const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, onRegister
       }
 
       setIsAuthenticating(true);
-await new Promise(resolve => setTimeout(resolve, 600)); // small delay for UX
-setIsAuthenticating(false);
+      const auth = await apiClient.login(identity, password);
+      setIsAuthenticating(false);
 
-const matched = users.find(
-  u => u.identity === identity && u.passwordHash === password
-);
-
-if (matched) {
-  onLogin(matched);
-} else {
-  setError("Invalid username or password.");
-}
+      if (auth?.user && auth?.token) {
+        onLogin(auth.user, auth.token);
+      } else {
+        setError("Invalid username or password.");
+      }
     } else if (view === 'Register') {
       // Granular Registration Validation
       if (!name.trim()) {
@@ -81,19 +77,16 @@ if (matched) {
         return;
       }
 
-      const newUser: User = {
-        id: `u-${Date.now()}`,
-        name,
-        identity,
-        passwordHash: password,
-        department: 'Administration',
-        role: 'Staff',
-        mfaEnabled: false,
-        authorityLimit: 0,
-        hasConsentedToPrivacy: true
-      };
-      
-      onRegister(newUser);
+      setIsAuthenticating(true);
+      const created = await apiClient.register({ name, identity, password });
+      setIsAuthenticating(false);
+
+      if (!created?.user) {
+        setError("Unable to create account. Confirm backend connection and try again.");
+        return;
+      }
+
+      onRegister(created.user);
       setView('Login');
       setSuccessMsg("Account drafted. Your identity is now awaiting administrator clearance.");
     }
