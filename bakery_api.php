@@ -460,10 +460,19 @@ switch($action) {
         break;
 
     case 'read':
-        if (!$provided_key || !hash_equals($API_KEY, $provided_key)) {
-            http_response_code(401); exit;
+        $token_payload = verify_token($auth_header, $TOKEN_SECRET);
+        if (!$token_payload) {
+            http_response_code(403);
+            echo json_encode(["status" => "error", "message" => "Session expired or invalid"]);
+            exit;
         }
-        echo file_get_contents($DATA_FILE);
+
+        $db = normalize_multitenant_db(json_decode(file_get_contents($DATA_FILE), true));
+        save_db($DATA_FILE, $db);
+
+        $orgId = $token_payload['orgId'] ?? 'org-default';
+        $tenantData = $db['tenants'][$orgId] ?? [];
+        echo json_encode($tenantData);
         break;
 
     case 'write':
@@ -486,8 +495,10 @@ switch($action) {
         $data_to_save = isset($json_payload['data']) ? $json_payload['data'] : $json_payload;
 
         if ($data_to_save && is_array($data_to_save)) {
-            $json_string = json_encode($data_to_save, JSON_PRETTY_PRINT);
-            file_put_contents($DATA_FILE, $json_string, LOCK_EX);
+            $db = normalize_multitenant_db(json_decode(file_get_contents($DATA_FILE), true));
+            $orgId = $token_payload['orgId'] ?? 'org-default';
+            $db['tenants'][$orgId] = $data_to_save;
+            save_db($DATA_FILE, $db);
             echo json_encode(["status" => "success", "user" => $token_payload['name']]);
         }
         break;
