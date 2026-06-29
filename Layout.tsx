@@ -7,9 +7,9 @@ import { useTranslation } from './hooks/useTranslation';
 
 interface NavItem { id: string; label: string; icon: string; tier: SubscriptionTier; translationKey: string; }
 interface NavGroup { label: string; items: NavItem[]; }
-interface LayoutProps { children: React.ReactNode; activeTab: string; setActiveTab: (tab: string) => void; session: AuthSession; onLogout: () => void; onOpenSearch: () => void; isLoaded?: boolean; activeCurrency?: CurrencyCode; setActiveCurrency?: (code: CurrencyCode) => void; subscriptionTier?: SubscriptionTier; activeLanguage?: LanguageCode; isOutletRestricted?: boolean; }
+interface LayoutProps { children: React.ReactNode; activeTab: string; setActiveTab: (tab: string) => void; session: AuthSession; onLogout: () => void; onOpenSearch: () => void; isLoaded?: boolean; activeCurrency?: CurrencyCode; setActiveCurrency?: (code: CurrencyCode) => void; subscriptionTier?: SubscriptionTier; activeLanguage?: LanguageCode; isOutletRestricted?: boolean; canAccessTab?: (tabId: string) => boolean; }
 
-const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, session, onLogout, onOpenSearch, isLoaded, activeCurrency, setActiveCurrency, subscriptionTier = 'Demo' as SubscriptionTier, activeLanguage = 'EN', isOutletRestricted = false }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, session, onLogout, onOpenSearch, isLoaded, activeCurrency, setActiveCurrency, subscriptionTier = 'Demo' as SubscriptionTier, activeLanguage = 'EN', isOutletRestricted = false, canAccessTab }) => {
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [connState, setConnState] = useState<ConnectionState>('Online');
@@ -72,15 +72,26 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
         { id: 'pc', label: 'Personnel', icon: '👥', tier: 'Essentials', translationKey: 'people' },
         { id: 'payroll', label: 'Payroll & Statutory', icon: '💸', tier: 'Pro', translationKey: 'payroll' },
         { id: 'neural-hub', label: 'Neural Hub', icon: '🧠', tier: 'Enterprise', translationKey: 'neural_hub' },
+        { id: 'admin-console', label: 'Admin Console', icon: '🛡️', tier: 'Enterprise', translationKey: 'settings' },
         { id: 'settings', label: 'System Settings', icon: '⚙️', tier: 'Essentials', translationKey: 'settings' },
       ]
     }
   ];
 
+  const visibleGroups = useMemo(() => {
+    if (!canAccessTab) return navGroups;
+    return navGroups
+      .map(group => ({
+        ...group,
+        items: group.items.filter(item => canAccessTab(item.id)),
+      }))
+      .filter(group => group.items.length > 0);
+  }, [canAccessTab]);
+
   useEffect(() => {
-    const activeGroup = navGroups.find(g => g.items.some(i => i.id === activeTab));
+    const activeGroup = visibleGroups.find(g => g.items.some(i => i.id === activeTab));
     if (activeGroup) setExpandedGroup(activeGroup.label);
-  }, [activeTab]);
+  }, [activeTab, visibleGroups]);
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
@@ -176,7 +187,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
             </div>
           </div>
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-hide">
-              {navGroups.map(group => (
+              {visibleGroups.map(group => (
                 <div key={group.label} className="space-y-1">
                   <button onClick={() => setExpandedGroup(expandedGroup === group.label ? null : group.label)} className="w-full flex items-center justify-between px-4 py-2 app-nav-group hover:text-harvest-400 transition-colors">{group.label}</button>
                   {expandedGroup === group.label && (
