@@ -317,9 +317,9 @@ const IngredientManager: React.FC<IngredientManagerProps> = ({ ingredients, setI
 
               <div className="space-y-6">
                  <div>
-                  <label className="block text-[10px] font-black text-emerald-400 uppercase mb-3 tracking-widest">3. Batch Unit Cost ({currency.active || 'UGX'})</label>
+                  <label className="block text-[10px] font-black text-emerald-400 uppercase mb-3 tracking-widest">3. Batch Unit Cost ({currency.active})</label>
                     <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/40 font-mono font-bold">{currency.active || 'UGX'}</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/40 font-mono font-bold">{currency.active}</span>
                         <input 
                             type="number" 
                             className="w-full p-5 pl-14 bg-white/10 border-none rounded-2xl font-mono font-black text-xl text-white outline-none focus:ring-2 focus:ring-emerald-500 shadow-inner" 

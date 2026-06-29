@@ -201,7 +201,7 @@ const OverheadManager: React.FC<OverheadManagerProps> = ({ overheads, setOverhea
                 </select>
               </div>
               <div className="lg:col-span-2">
-                <label className="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Amount ({currency?.active || 'UGX'})</label>
+                <label className="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Amount ({currency?.active})</label>
                 <input type="number" className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 text-sm font-mono font-bold" value={newOh.amount || ''} onChange={e => setNewOh({ ...newOh, amount: parseFloat(e.target.value) })} />
               </div>
               <div className="lg:col-span-2">

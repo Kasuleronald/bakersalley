@@ -122,7 +122,7 @@ const SupplierManager: React.FC<SupplierManagerProps> = ({ suppliers, setSupplie
                   <input className="w-full p-4 bg-indigo-50/50 border-none rounded-2xl font-bold text-sm placeholder:text-indigo-200" value={newSupplier.paymentTerms} onChange={e => setNewSupplier({...newSupplier, paymentTerms: e.target.value})} placeholder="e.g. Net 30, Pay on Delivery, 15% Late Fee..." />
                </div>
                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Credit Limit ({currency?.active || 'UGX'})</label>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Credit Limit ({currency?.active})</label>
                   <input type="number" className="w-full p-4 bg-slate-50 border-none rounded-2xl font-mono font-black" value={newSupplier.creditLimit || ''} onChange={e => setNewSupplier({...newSupplier, creditLimit: parseFloat(e.target.value) || 0})} />
                </div>
                <div className="flex gap-2">

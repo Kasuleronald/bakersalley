@@ -162,7 +162,7 @@ const NeuralBookkeepingInbox: React.FC<NeuralBookkeepingInboxProps> = ({ transac
                           </td>
                           <td className="px-10 py-5 text-right">
                              <div className="flex items-center justify-end gap-2">
-                                <span className="text-[9px] font-black text-slate-300">{currency.active || 'UGX'}</span>
+                                <span className="text-[9px] font-black text-slate-300">{currency.active}</span>
                                 <input type="number" className="w-32 bg-transparent border-none text-right font-mono font-black text-lg text-slate-900 outline-none" value={entry.amount} onChange={e => {
                                    const next = [...draftEntries];
                                    next[idx].amount = parseFloat(e.target.value) || 0;

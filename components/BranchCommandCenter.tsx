@@ -192,7 +192,7 @@ const BranchCommandCenter: React.FC<BranchCommandCenterProps> = ({ skus, outlets
                  <div className="flex justify-between py-1"><span>Slice Wholemeal x2</span><span>9,600</span></div>
               </div>
               <div className="flex justify-between font-black text-base">
-                 <span>TOTAL ({currency.active || 'UGX'})</span>
+                 <span>TOTAL ({currency.active})</span>
                  <span>54,600</span>
               </div>
               <div className="text-center pt-10 opacity-40">

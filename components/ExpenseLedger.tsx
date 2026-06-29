@@ -203,7 +203,7 @@ const ExpenseLedger: React.FC<ExpenseLedgerProps> = ({ transactions, setTransact
                    />
                    
                    <div>
-                     <label className="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Magnitude ({currency?.active || 'UGX'})</label>
+                     <label className="block text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Magnitude ({currency?.active})</label>
                      <input type="number" className="w-full px-6 py-4 rounded-2xl bg-slate-50 font-mono font-bold text-xl text-indigo-900 outline-none" value={newExp.amount || ''} onChange={e => setNewExp({...newExp, amount: parseFloat(e.target.value) || 0})} placeholder="0" />
                    </div>
 

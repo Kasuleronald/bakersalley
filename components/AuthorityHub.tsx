@@ -60,7 +60,7 @@ const AuthorityHub: React.FC<AuthorityHubProps> = ({ users, currency }) => {
                  </select>
               </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Authority Limit ({currency.active || 'UGX'})</label>
+                   <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Authority Limit ({currency.active})</label>
                  <input type="number" className="w-full p-4 bg-slate-50 border-none rounded-2xl font-mono font-black" value={newUser.authorityLimit || ''} onChange={e => setNewUser({...newUser, authorityLimit: parseFloat(e.target.value) || 0})} />
               </div>
            </div>

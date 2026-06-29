@@ -183,7 +183,7 @@ const SalesForceAutomation: React.FC<SalesForceAutomationProps> = ({ leads = [],
                     <input className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm" value={newLead.contactPerson} onChange={e => setNewLead({...newLead, contactPerson: e.target.value})} />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Est. Annual Value ({currency.active || 'UGX'})</label>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Est. Annual Value ({currency.active})</label>
                     <input type="number" className="w-full p-4 bg-slate-50 border-none rounded-2xl font-mono font-black" value={newLead.estimatedValue || ''} onChange={e => setNewLead({...newLead, estimatedValue: parseFloat(e.target.value) || 0})} />
                   </div>
                   <div className="flex gap-2">
