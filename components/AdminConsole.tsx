@@ -336,11 +336,9 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                     <td className="px-6 py-4">{org.status}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
-                        <button type="button" onClick={() => toggleOrganizationStatus(org.id)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold uppercase text-slate-700">
-                          {org.status === 'Active' ? 'Disable' : 'Enable'}
-                        </button>
-                        <button type="button" onClick={() => deleteOrganization(org.id)} className="rounded-lg border border-rose-200 px-3 py-2 text-xs font-bold uppercase text-rose-700">
-                          Delete
+                        <StatusToggle enabled={org.status === 'Active'} onToggle={() => toggleOrganizationStatus(org.id)} label={`${org.status === 'Active' ? 'Disable' : 'Enable'} ${org.name}`} />
+                        <button type="button" onClick={() => deleteOrganization(org.id)} className="rounded-lg border border-rose-200 p-2 text-rose-700" aria-label={`Delete ${org.name}`}>
+                          <DeleteIcon />
                         </button>
                       </div>
                     </td>
