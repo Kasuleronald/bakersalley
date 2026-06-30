@@ -271,6 +271,15 @@ const App: React.FC = () => {
 
   const canAccessTab = (tabId: string) => hasTabAccess(session.user, tabId);
 
+  const handleLogin = (user: User, token: string) => {
+    setSession({ user, token, businessId: user.orgId, orgId: user.orgId });
+    if (['Platform Admin', 'Admin', 'Managing Director'].includes(user.role)) {
+      setActiveTab('admin-console');
+      return;
+    }
+    setActiveTab('dashboard');
+  };
+
   // All core amounts are stored in UGX and converted at render time for display.
   const currencyConfig = {
     active: activeCurrency,
@@ -450,7 +459,7 @@ const App: React.FC = () => {
     return (
       <AuthGate
         session={session}
-        onLogin={(user, token) => setSession({ user, token, businessId: user.orgId, orgId: user.orgId })}
+        onLogin={handleLogin}
         onVerifyMfa={() => {}}
         users={users}
         onRegister={(newUser) => setUsers([...users, newUser])}
