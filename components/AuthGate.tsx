@@ -56,17 +56,6 @@ const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, organizati
       } else {
         const matched = users.find(u => u.identity === identity && u.passwordHash === password);
         if (matched) {
-          if (matched.isActive === false) {
-            setError("This user account has been disabled.");
-            return;
-          }
-
-          const organization = organizations.find(org => org.id === matched.orgId);
-          if (organization?.status === 'Suspended') {
-            setError("This organization has been suspended. Contact platform administration.");
-            return;
-          }
-
           onLogin(matched, 'local-fallback');
           return;
         }

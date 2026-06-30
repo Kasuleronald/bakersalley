@@ -169,6 +169,22 @@ const App: React.FC = () => {
   const [leaveApplications, setLeaveApplications] = useState<LeaveApplication[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
 
+  const currentUserRecord = useMemo(() => {
+    if (!session.user) return null;
+    return users.find(user => user.id === session.user?.id || user.identity === session.user?.identity) || session.user;
+  }, [session.user, users]);
+
+  const currentOrganization = useMemo(() => {
+    if (!currentUserRecord?.orgId) return null;
+    return organizations.find(org => org.id === currentUserRecord.orgId) || null;
+  }, [currentUserRecord?.orgId, organizations]);
+
+  const isSuspendedAccess = Boolean(
+    session.user && (
+      currentUserRecord?.isActive === false || currentOrganization?.status === 'Suspended'
+    )
+  );
+
   useEffect(() => {
     const init = async () => {
       const db = await apiClient.getDb();
@@ -492,6 +508,23 @@ const App: React.FC = () => {
         onRegister={(newUser) => setUsers([...users, newUser])}
         taxConfig={taxConfig}
       />
+    );
+  }
+
+  if (isSuspendedAccess) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
+        <div className="max-w-xl w-full text-center">
+          <div className="text-[11px] font-black uppercase tracking-[0.35em] text-amber-500">Access Restricted</div>
+          <h1 className="mt-4 text-4xl font-bold text-slate-900 font-serif">You are Suspended</h1>
+          <p className="mt-4 text-lg text-slate-600">Please contact your Organisation&apos;s Administrator.</p>
+          <div className="mt-8">
+            <button onClick={() => setSession({ user: null, token: null })} className="rounded-2xl bg-slate-900 px-6 py-3 text-sm font-bold uppercase text-white">
+              Return To Login
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 
