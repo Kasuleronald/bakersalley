@@ -494,7 +494,8 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {users.map(u => (
-                  <tr key={u.id}>
+                  <React.Fragment key={u.id}>
+                  <tr>
                     <td className="px-6 py-4">
                       <div className="font-semibold">{u.name}</div>
                       <div className="text-xs text-slate-500">{u.identity}</div>
@@ -559,7 +560,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                     </td>
                   </tr>
                 {editingUserId === u.id && (
-                  <tr key={`${u.id}-editor`} className="bg-slate-50/70">
+                  <tr className="bg-slate-50/70">
                     <td colSpan={5} className="px-6 py-5">
                       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
                         <div>
@@ -603,6 +604,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                     </td>
                   </tr>
                 )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
