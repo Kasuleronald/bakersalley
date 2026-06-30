@@ -59,6 +59,11 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     </svg>
   );
 
+  const showSuccessDialog = (message: string) => {
+    setStatusMessage(message);
+    window.alert(message);
+  };
+
   const addOrganization = async () => {
     if (!orgName.trim()) {
       setStatusMessage('Enter an organization name first.');
@@ -82,7 +87,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     await persistChanges({ organizations: nextOrganizations });
     setOrgName('');
     setOrgTier('Essentials');
-    setStatusMessage(`Organization ${org.name} added.`);
+    showSuccessDialog(`Organization ${org.name} added successfully.`);
   };
 
   const addUser = async () => {
@@ -137,7 +142,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     setNewUserIdNumber('');
     setNewUserPhoneNumber('');
     setNewUserBirthMonthDay('');
-    setStatusMessage(`User ${user.name} created.`);
+    showSuccessDialog(`User ${user.name} created successfully.`);
   };
 
   const startEditUser = (user: User) => {
@@ -178,7 +183,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     ));
     setUsers(nextUsers);
     await persistChanges({ users: nextUsers });
-    setStatusMessage('User access updated.');
+    showSuccessDialog('User access updated successfully.');
     cancelEditUser();
   };
 
@@ -191,12 +196,18 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       return;
     }
 
+    const nextStatus = target.status === 'Active' ? 'Suspended' : 'Active';
+    const confirmed = window.confirm(`Are you sure you want to ${nextStatus === 'Suspended' ? 'suspend' : 'enable'} ${target.name}?`);
+    if (!confirmed) {
+      return;
+    }
+
     const nextOrganizations = organizations.map(org => (
       org.id === id ? { ...org, status: org.status === 'Active' ? 'Suspended' : 'Active' } : org
     ));
     setOrganizations(nextOrganizations);
     await persistChanges({ organizations: nextOrganizations });
-    setStatusMessage(`Organization ${target.name} is now ${target.status === 'Active' ? 'Suspended' : 'Active'}.`);
+    showSuccessDialog(`Organization ${target.name} is now ${nextStatus}.`);
   };
 
   const deleteOrganization = async (id: string) => {
@@ -213,10 +224,15 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       return;
     }
 
+    const confirmed = window.confirm(`Delete organization ${target.name}? This cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
     const nextOrganizations = organizations.filter(org => org.id !== id);
     setOrganizations(nextOrganizations);
     await persistChanges({ organizations: nextOrganizations });
-    setStatusMessage(`Organization ${target.name} deleted.`);
+    showSuccessDialog(`Organization ${target.name} deleted successfully.`);
   };
 
   const toggleUserStatus = async (id: string) => {
@@ -228,12 +244,18 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       return;
     }
 
+    const nextEnabledState = target.isActive === false;
+    const confirmed = window.confirm(`Are you sure you want to ${nextEnabledState ? 'enable' : 'disable'} ${target.name}?`);
+    if (!confirmed) {
+      return;
+    }
+
     const nextUsers = users.map(user => (
       user.id === id ? { ...user, isActive: user.isActive === false ? true : false } : user
     ));
     setUsers(nextUsers);
     await persistChanges({ users: nextUsers });
-    setStatusMessage(`User ${target.name} ${target.isActive === false ? 'enabled' : 'disabled'}.`);
+    showSuccessDialog(`User ${target.name} ${nextEnabledState ? 'enabled' : 'disabled'} successfully.`);
   };
 
   const deleteUser = async (id: string) => {
@@ -250,13 +272,18 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       return;
     }
 
+    const confirmed = window.confirm(`Delete user ${target.name}? This cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
     const nextUsers = users.filter(user => user.id !== id);
     setUsers(nextUsers);
     await persistChanges({ users: nextUsers });
     if (editingUserId === id) {
       cancelEditUser();
     }
-    setStatusMessage(`User ${target.name} deleted.`);
+    showSuccessDialog(`User ${target.name} deleted successfully.`);
   };
 
   return (
