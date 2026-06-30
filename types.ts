@@ -232,6 +232,9 @@ export interface User {
   identity: string;
   passwordHash?: string;
   isActive?: boolean;
+  idNumber?: string;
+  phoneNumber?: string;
+  birthMonthDay?: string;
   orgId?: string;
   department: DepartmentName;
   role: UserRole | string;

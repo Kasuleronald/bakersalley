@@ -7,9 +7,9 @@ import { useTranslation } from './hooks/useTranslation';
 
 interface NavItem { id: string; label: string; icon: string; tier: SubscriptionTier; translationKey: string; }
 interface NavGroup { label: string; items: NavItem[]; }
-interface LayoutProps { children: React.ReactNode; activeTab: string; setActiveTab: (tab: string) => void; session: AuthSession; onLogout: () => void; onOpenSearch: () => void; isLoaded?: boolean; activeCurrency?: CurrencyCode; setActiveCurrency?: (code: CurrencyCode) => void; subscriptionTier?: SubscriptionTier; activeLanguage?: LanguageCode; isOutletRestricted?: boolean; canAccessTab?: (tabId: string) => boolean; }
+interface LayoutProps { children: React.ReactNode; activeTab: string; setActiveTab: (tab: string) => void; session: AuthSession; onLogout: () => void; onOpenSearch: () => void; isLoaded?: boolean; activeCurrency?: CurrencyCode; setActiveCurrency?: (code: CurrencyCode) => void; subscriptionTier?: SubscriptionTier; activeLanguage?: LanguageCode; isOutletRestricted?: boolean; canAccessTab?: (tabId: string) => boolean; birthdayAnnouncements?: string[]; }
 
-const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, session, onLogout, onOpenSearch, isLoaded, activeCurrency, setActiveCurrency, subscriptionTier = 'Demo' as SubscriptionTier, activeLanguage = 'EN', isOutletRestricted = false, canAccessTab }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, session, onLogout, onOpenSearch, isLoaded, activeCurrency, setActiveCurrency, subscriptionTier = 'Demo' as SubscriptionTier, activeLanguage = 'EN', isOutletRestricted = false, canAccessTab, birthdayAnnouncements = [] }) => {
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [connState, setConnState] = useState<ConnectionState>('Online');
@@ -212,6 +212,14 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
 
       <main className="flex-1 min-w-0 overflow-y-auto pt-16 md:pt-0">
         <div className="max-w-6xl mx-auto p-4 md:p-12">
+          {birthdayAnnouncements.length > 0 && (
+            <div className="mb-6 rounded-[2rem] border border-amber-200 bg-[linear-gradient(135deg,#fff8e8_0%,#fff1c7_100%)] px-6 py-4 text-amber-900 shadow-sm animate-softFade">
+              <div className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-600">Organization Birthday Alert</div>
+              <div className="mt-1 text-sm font-semibold">
+                {birthdayAnnouncements.join(' ')}
+              </div>
+            </div>
+          )}
           {/* Main Content Header */}
           <div className="hidden md:flex justify-between items-center mb-10">
             <div className="app-shell-title">Institutional Ledger / Enterprise v3.2</div>

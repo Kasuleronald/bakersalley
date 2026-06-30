@@ -276,6 +276,27 @@ const App: React.FC = () => {
 
   const canAccessTab = (tabId: string) => hasTabAccess(session.user, tabId);
 
+  const birthdayAnnouncements = useMemo(() => {
+    if (!session.user?.orgId) return [];
+
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayKey = `${month}-${day}`;
+    const orgName = organizations.find(org => org.id === session.user?.orgId)?.name || 'your organization';
+
+    const celebrants = users.filter(user => (
+      user.orgId === session.user?.orgId
+      && user.isActive !== false
+      && user.birthMonthDay === todayKey
+    ));
+
+    if (celebrants.length === 0) return [];
+
+    const names = celebrants.map(user => user.name).join(', ');
+    return [`Today in ${orgName}: celebrate ${names}.`];
+  }, [organizations, session.user?.orgId, users]);
+
   const handleLogin = (user: User, token: string) => {
     setSession({ user, token, businessId: user.orgId, orgId: user.orgId });
     if (user.role === 'Platform Admin') {
@@ -483,6 +504,7 @@ const App: React.FC = () => {
       subscriptionTier={subscriptionTier}
       activeLanguage={activeLanguage}
       canAccessTab={canAccessTab}
+      birthdayAnnouncements={birthdayAnnouncements}
     >
       {renderContent()}
       <GlobalSearch
