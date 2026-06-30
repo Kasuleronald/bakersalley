@@ -6,9 +6,10 @@ interface AdminConsoleProps {
   setUsers: (users: User[]) => void;
   organizations: Organization[];
   setOrganizations: (orgs: Organization[]) => void;
+  persistChanges: (updates: { users?: User[]; organizations?: Organization[] }) => Promise<void>;
 }
 
-const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizations, setOrganizations }) => {
+const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizations, setOrganizations, persistChanges }) => {
   const [activeTab, setActiveTab] = useState<'Organizations' | 'Users'>('Organizations');
   const [orgName, setOrgName] = useState('');
   const [orgTier, setOrgTier] = useState<SubscriptionTier>('Essentials');
@@ -19,11 +20,14 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
   const [newUserOrgId, setNewUserOrgId] = useState('org-default');
   const [newUserRole, setNewUserRole] = useState<UserRole>('Staff');
   const [newUserDepartment, setNewUserDepartment] = useState<DepartmentName>('Administration');
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editOrgId, setEditOrgId] = useState('');
+  const [editRole, setEditRole] = useState<UserRole>('Staff');
 
   const roleOptions: UserRole[] = ['Platform Admin', 'Managing Director', 'Admin', 'Manager', 'Plant Manager', 'Finance', 'Store Keeper', 'Staff'];
   const departmentOptions: DepartmentName[] = ['Administration', 'Production', 'Distribution & Logistics', 'Quality Assurance', 'R&D', 'Sanitation', 'Welfare', 'Sales and Marketing', 'Stores', 'Finance', 'SuperAdmin', 'Security', 'Board of Directors'];
 
-  const addOrganization = () => {
+  const addOrganization = async () => {
     if (!orgName.trim()) {
       setStatusMessage('Enter an organization name first.');
       return;
@@ -41,13 +45,15 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       subscriptionTier: orgTier,
       createdAt: new Date().toISOString(),
     };
-    setOrganizations([org, ...organizations]);
+    const nextOrganizations = [org, ...organizations];
+    setOrganizations(nextOrganizations);
+    await persistChanges({ organizations: nextOrganizations });
     setOrgName('');
     setOrgTier('Essentials');
     setStatusMessage(`Organization ${org.name} added.`);
   };
 
-  const addUser = () => {
+  const addUser = async () => {
     if (!newUserName.trim() || !newUserIdentity.trim() || !newUserPassword.trim()) {
       setStatusMessage('Name, identity, and password are required to create a user.');
       return;
@@ -78,7 +84,9 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       systemVersion: '0.0.0',
     };
 
-    setUsers([user, ...users]);
+    const nextUsers = [user, ...users];
+    setUsers(nextUsers);
+    await persistChanges({ users: nextUsers });
     setNewUserName('');
     setNewUserIdentity('');
     setNewUserPassword('');
@@ -88,12 +96,28 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     setStatusMessage(`User ${user.name} created.`);
   };
 
-  const updateUserRole = (id: string, role: UserRole | string) => {
-    setUsers(users.map(u => (u.id === id ? { ...u, role } : u)));
+  const startEditUser = (user: User) => {
+    setEditingUserId(user.id);
+    setEditOrgId(user.orgId || '');
+    setEditRole((user.role as UserRole) || 'Staff');
   };
 
-  const updateUserOrg = (id: string, orgId: string) => {
-    setUsers(users.map(u => (u.id === id ? { ...u, orgId } : u)));
+  const cancelEditUser = () => {
+    setEditingUserId(null);
+    setEditOrgId('');
+    setEditRole('Staff');
+  };
+
+  const saveUserEdit = async (id: string) => {
+    const nextUsers = users.map(user => (
+      user.id === id
+        ? { ...user, orgId: editOrgId || 'org-default', role: editRole }
+        : user
+    ));
+    setUsers(nextUsers);
+    await persistChanges({ users: nextUsers });
+    setStatusMessage('User access updated.');
+    cancelEditUser();
   };
 
   return (
@@ -262,6 +286,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                   <th className="px-6 py-4">User</th>
                   <th className="px-6 py-4">Organization</th>
                   <th className="px-6 py-4">Role</th>
+                  <th className="px-6 py-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -272,27 +297,53 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                       <div className="text-xs text-slate-500">{u.identity}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <select
-                        className="p-2 rounded-lg bg-slate-50 border border-slate-100"
-                        value={u.orgId || ''}
-                        onChange={e => updateUserOrg(u.id, e.target.value)}
-                      >
-                        <option value="">Unassigned</option>
-                        {organizations.map(org => (
-                          <option key={org.id} value={org.id}>{org.name}</option>
-                        ))}
-                      </select>
+                      {editingUserId === u.id ? (
+                        <select
+                          className="p-2 rounded-lg bg-slate-50 border border-slate-100"
+                          value={editOrgId}
+                          onChange={e => setEditOrgId(e.target.value)}
+                        >
+                          <option value="">Unassigned</option>
+                          {organizations.map(org => (
+                            <option key={org.id} value={org.id}>{org.name}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span>{organizations.find(org => org.id === u.orgId)?.name || 'Unassigned'}</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
-                      <select
-                        className="p-2 rounded-lg bg-slate-50 border border-slate-100"
-                        value={u.role}
-                        onChange={e => updateUserRole(u.id, e.target.value)}
-                      >
-                        {roleOptions.map(role => (
-                          <option key={role} value={role}>{role}</option>
-                        ))}
-                      </select>
+                      {editingUserId === u.id ? (
+                        <select
+                          className="p-2 rounded-lg bg-slate-50 border border-slate-100"
+                          value={editRole}
+                          onChange={e => setEditRole(e.target.value as UserRole)}
+                        >
+                          {roleOptions.map(role => (
+                            <option key={role} value={role}>{role}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span>{u.role}</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        {editingUserId === u.id ? (
+                          <>
+                            <button type="button" onClick={() => saveUserEdit(u.id)} className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold uppercase text-white">
+                              Save
+                            </button>
+                            <button type="button" onClick={cancelEditUser} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold uppercase text-slate-600">
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <button type="button" onClick={() => startEditUser(u)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" aria-label={`Edit ${u.name}`}>
+                            ✎
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

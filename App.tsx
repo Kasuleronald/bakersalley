@@ -245,18 +245,26 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const buildFullState = (overrides: Partial<Record<string, unknown>> = {}) => ({
+    taxConfig, skus, ingredients, activities, overheads, employees,
+    transactions, productionLogs, sales, customers, orders,
+    outlets, finishedGoods, outletStocks, inventoryLosses,
+    requisitions, loans, invoices, forecasts, outletForecasts,
+    movements, assets, suppliers, budgets, accountGroups,
+    wbTickets, gatePasses, users, agents, directives,
+    qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile, organizations,
+    ...overrides,
+  });
+
+  const persistGovernanceState = async (updates: { users?: User[]; organizations?: Organization[] }) => {
+    const nextUsers = updates.users ?? users;
+    const nextOrganizations = updates.organizations ?? organizations;
+    await apiClient.saveDb(buildFullState({ users: nextUsers, organizations: nextOrganizations }));
+  };
+
   useEffect(() => {
     const saveData = async () => {
-      const fullState = {
-        taxConfig, skus, ingredients, activities, overheads, employees,
-        transactions, productionLogs, sales, customers, orders,
-        outlets, finishedGoods, outletStocks, inventoryLosses,
-        requisitions, loans, invoices, forecasts, outletForecasts,
-        movements, assets, suppliers, budgets, accountGroups,
-        wbTickets, gatePasses, users, agents, directives,
-        qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile, organizations
-      };
-      await apiClient.saveDb(fullState);
+      await apiClient.saveDb(buildFullState());
     };
     const debounceSave = setTimeout(saveData, 1500);
     return () => clearTimeout(debounceSave);
@@ -449,7 +457,7 @@ const App: React.FC = () => {
       case 'qa': return <QualityAssurance {...commonProps} />;
       case 'support': return <SupportAssistant {...commonProps} />;
       case 'neural-hub': return <NeuralHub {...commonProps} onNavigate={setActiveTab} />;
-      case 'admin-console': return <AdminConsole users={users} setUsers={setUsers} organizations={organizations} setOrganizations={setOrganizations} />;
+      case 'admin-console': return <AdminConsole users={users} setUsers={setUsers} organizations={organizations} setOrganizations={setOrganizations} persistChanges={persistGovernanceState} />;
       default: return <Dashboard cashOnHand={0} totalRevenue={0} currency={currencyConfig} onNavigate={setActiveTab} activeLanguage={activeLanguage} />;
     }
   };
