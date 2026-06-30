@@ -7,9 +7,10 @@ interface AdminConsoleProps {
   organizations: Organization[];
   setOrganizations: (orgs: Organization[]) => void;
   persistChanges: (updates: { users?: User[]; organizations?: Organization[] }) => Promise<void>;
+  currentUserId: string | null;
 }
 
-const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizations, setOrganizations, persistChanges }) => {
+const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizations, setOrganizations, persistChanges, currentUserId }) => {
   const [activeTab, setActiveTab] = useState<'Organizations' | 'Users'>('Organizations');
   const [orgName, setOrgName] = useState('');
   const [orgTier, setOrgTier] = useState<SubscriptionTier>('Essentials');
@@ -74,6 +75,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       name: newUserName.trim(),
       identity: newUserIdentity.trim(),
       passwordHash: newUserPassword,
+      isActive: true,
       orgId: newUserOrgId || 'org-default',
       department: newUserDepartment,
       role: newUserRole,
@@ -118,6 +120,83 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     await persistChanges({ users: nextUsers });
     setStatusMessage('User access updated.');
     cancelEditUser();
+  };
+
+  const toggleOrganizationStatus = async (id: string) => {
+    const target = organizations.find(org => org.id === id);
+    if (!target) return;
+
+    if (id === 'org-default' && target.status === 'Active') {
+      setStatusMessage('The default organization cannot be suspended.');
+      return;
+    }
+
+    const nextOrganizations = organizations.map(org => (
+      org.id === id ? { ...org, status: org.status === 'Active' ? 'Suspended' : 'Active' } : org
+    ));
+    setOrganizations(nextOrganizations);
+    await persistChanges({ organizations: nextOrganizations });
+    setStatusMessage(`Organization ${target.name} is now ${target.status === 'Active' ? 'Suspended' : 'Active'}.`);
+  };
+
+  const deleteOrganization = async (id: string) => {
+    const target = organizations.find(org => org.id === id);
+    if (!target) return;
+
+    if (id === 'org-default') {
+      setStatusMessage('The default organization cannot be deleted.');
+      return;
+    }
+
+    if (users.some(user => user.orgId === id)) {
+      setStatusMessage('Reassign or remove users before deleting this organization.');
+      return;
+    }
+
+    const nextOrganizations = organizations.filter(org => org.id !== id);
+    setOrganizations(nextOrganizations);
+    await persistChanges({ organizations: nextOrganizations });
+    setStatusMessage(`Organization ${target.name} deleted.`);
+  };
+
+  const toggleUserStatus = async (id: string) => {
+    const target = users.find(user => user.id === id);
+    if (!target) return;
+
+    if (id === currentUserId) {
+      setStatusMessage('You cannot disable the account currently in use.');
+      return;
+    }
+
+    const nextUsers = users.map(user => (
+      user.id === id ? { ...user, isActive: user.isActive === false ? true : false } : user
+    ));
+    setUsers(nextUsers);
+    await persistChanges({ users: nextUsers });
+    setStatusMessage(`User ${target.name} ${target.isActive === false ? 'enabled' : 'disabled'}.`);
+  };
+
+  const deleteUser = async (id: string) => {
+    const target = users.find(user => user.id === id);
+    if (!target) return;
+
+    if (id === currentUserId) {
+      setStatusMessage('You cannot delete the account currently in use.');
+      return;
+    }
+
+    if (target.role === 'Platform Admin') {
+      setStatusMessage('Delete of the Platform Admin account is blocked in local mode.');
+      return;
+    }
+
+    const nextUsers = users.filter(user => user.id !== id);
+    setUsers(nextUsers);
+    await persistChanges({ users: nextUsers });
+    if (editingUserId === id) {
+      cancelEditUser();
+    }
+    setStatusMessage(`User ${target.name} deleted.`);
   };
 
   return (
@@ -186,6 +265,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                   <th className="px-6 py-4">Organization</th>
                   <th className="px-6 py-4">Tier</th>
                   <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -194,6 +274,16 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                     <td className="px-6 py-4 font-semibold">{org.name}</td>
                     <td className="px-6 py-4">{org.subscriptionTier}</td>
                     <td className="px-6 py-4">{org.status}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button type="button" onClick={() => toggleOrganizationStatus(org.id)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold uppercase text-slate-700">
+                          {org.status === 'Active' ? 'Disable' : 'Enable'}
+                        </button>
+                        <button type="button" onClick={() => deleteOrganization(org.id)} className="rounded-lg border border-rose-200 px-3 py-2 text-xs font-bold uppercase text-rose-700">
+                          Delete
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -284,6 +374,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
               <thead>
                 <tr className="bg-slate-50 text-[10px] uppercase text-slate-500">
                   <th className="px-6 py-4">User</th>
+                  <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Organization</th>
                   <th className="px-6 py-4">Role</th>
                   <th className="px-6 py-4 text-right">Action</th>
@@ -295,6 +386,11 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                     <td className="px-6 py-4">
                       <div className="font-semibold">{u.name}</div>
                       <div className="text-xs text-slate-500">{u.identity}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${u.isActive === false ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                        {u.isActive === false ? 'Disabled' : 'Active'}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       {editingUserId === u.id ? (
@@ -339,9 +435,17 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                             </button>
                           </>
                         ) : (
-                          <button type="button" onClick={() => startEditUser(u)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" aria-label={`Edit ${u.name}`}>
-                            ✎
-                          </button>
+                          <>
+                            <button type="button" onClick={() => startEditUser(u)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" aria-label={`Edit ${u.name}`}>
+                              ✎
+                            </button>
+                            <button type="button" onClick={() => toggleUserStatus(u.id)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold uppercase text-slate-700">
+                              {u.isActive === false ? 'Enable' : 'Disable'}
+                            </button>
+                            <button type="button" onClick={() => deleteUser(u.id)} className="rounded-lg border border-rose-200 px-3 py-2 text-xs font-bold uppercase text-rose-700">
+                              Delete
+                            </button>
+                          </>
                         )}
                       </div>
                     </td>
