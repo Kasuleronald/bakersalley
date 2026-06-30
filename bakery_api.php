@@ -483,8 +483,8 @@ switch($action) {
             exit;
         }
 
-        // RBAC Interlock: Only Admin/Manager can write to master ledger
-        if (!in_array($token_payload['role'], ['Admin', 'Manager', 'Managing Director'])) {
+        // RBAC interlock: allow governance-capable roles to persist tenant data.
+        if (!in_array($token_payload['role'], ['Platform Admin', 'Admin', 'Manager', 'Managing Director'])) {
             http_response_code(403);
             echo json_encode(["status" => "error", "message" => "Insufficient permissions for write action."]);
             exit;
