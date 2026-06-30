@@ -101,6 +101,15 @@
 				"run",
 				"lint"
 			]
+		},
+		{
+			"label": "lint-adminconsole-birthday-fix-2",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"lint"
+			]
 		}
 	]
 }
