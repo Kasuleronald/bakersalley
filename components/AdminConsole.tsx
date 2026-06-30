@@ -149,7 +149,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       subscriptionTier: orgTier,
       createdAt: new Date().toISOString(),
     };
-    const nextOrganizations = [org, ...organizations];
+    const nextOrganizations: Organization[] = [org, ...organizations];
     setOrganizations(nextOrganizations);
     await persistChanges({ organizations: nextOrganizations });
     setOrgName('');
@@ -271,13 +271,13 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       return;
     }
 
-    const nextStatus = target.status === 'Active' ? 'Suspended' : 'Active';
+    const nextStatus: Organization['status'] = target.status === 'Active' ? 'Suspended' : 'Active';
     const confirmed = window.confirm(`Are you sure you want to ${nextStatus === 'Suspended' ? 'suspend' : 'enable'} ${target.name}?`);
     if (!confirmed) {
       return;
     }
 
-    const nextOrganizations = organizations.map(org => (
+    const nextOrganizations: Organization[] = organizations.map(org => (
       org.id === id ? { ...org, status: org.status === 'Active' ? 'Suspended' : 'Active' } : org
     ));
     setOrganizations(nextOrganizations);
@@ -304,7 +304,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       return;
     }
 
-    const nextOrganizations = organizations.filter(org => org.id !== id);
+    const nextOrganizations: Organization[] = organizations.filter(org => org.id !== id);
     setOrganizations(nextOrganizations);
     await persistChanges({ organizations: nextOrganizations });
     showSuccessDialog(`Organization ${target.name} deleted successfully.`);
