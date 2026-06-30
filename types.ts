@@ -231,6 +231,7 @@ export interface User {
   name: string;
   identity: string;
   passwordHash?: string;
+  isActive?: boolean;
   orgId?: string;
   department: DepartmentName;
   role: UserRole | string;

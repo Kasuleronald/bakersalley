@@ -8,11 +8,12 @@ interface AuthGateProps {
   onLogin: (user: User, token: string) => void;
   onVerifyMfa: () => void;
   users: User[];
+  organizations?: { id: string; status: 'Active' | 'Suspended' }[];
   onRegister: (user: User) => void;
   taxConfig?: TaxConfig;
 }
 
-const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, onRegister, taxConfig }) => {
+const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, organizations = [], onRegister, taxConfig }) => {
   const [view, setView] = useState<'Login' | 'Register'>('Login');
   const [identity, setIdentity] = useState('');
   const [name, setName] = useState('');
@@ -55,6 +56,17 @@ const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, onRegister
       } else {
         const matched = users.find(u => u.identity === identity && u.passwordHash === password);
         if (matched) {
+          if (matched.isActive === false) {
+            setError("This user account has been disabled.");
+            return;
+          }
+
+          const organization = organizations.find(org => org.id === matched.orgId);
+          if (organization?.status === 'Suspended') {
+            setError("This organization has been suspended. Contact platform administration.");
+            return;
+          }
+
           onLogin(matched, 'local-fallback');
           return;
         }

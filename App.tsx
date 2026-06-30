@@ -48,16 +48,13 @@ import { bakeryService } from './services/bakeryService';
 import { apiClient } from './services/apiClient';
 import { hasTabAccess } from './utils/accessControl';
 
-const mergeSeedUsers = (loadedUsers: User[] = []): User[] => {
-  const byIdentity = new Map(loadedUsers.map(user => [user.identity, user]));
-
-  for (const seedUser of INITIAL_USERS) {
-    if (!byIdentity.has(seedUser.identity)) {
-      byIdentity.set(seedUser.identity, seedUser);
-    }
+const ensurePlatformAdminSeed = (loadedUsers: User[] = []): User[] => {
+  const platformAdminSeed = INITIAL_USERS.find(user => user.role === 'Platform Admin');
+  if (!platformAdminSeed) return loadedUsers;
+  if (loadedUsers.some(user => user.identity === platformAdminSeed.identity)) {
+    return loadedUsers;
   }
-
-  return Array.from(byIdentity.values());
+  return [platformAdminSeed, ...loadedUsers];
 };
 
 const App: React.FC = () => {
@@ -203,7 +200,7 @@ const App: React.FC = () => {
         if (db.accountGroups) setAccountGroups(db.accountGroups);
         if (db.wbTickets) setWbTickets(db.wbTickets);
         if (db.gatePasses) setGatePasses(db.gatePasses);
-        if (db.users) setUsers(mergeSeedUsers(db.users));
+        if (db.users) setUsers(ensurePlatformAdminSeed(db.users));
         if (db.agents) setAgents(db.agents);
         if (db.directives) setBoardDirectives(db.directives);
         if (db.qaLogs) setQaLogs(db.qaLogs);
@@ -457,7 +454,7 @@ const App: React.FC = () => {
       case 'qa': return <QualityAssurance {...commonProps} />;
       case 'support': return <SupportAssistant {...commonProps} />;
       case 'neural-hub': return <NeuralHub {...commonProps} onNavigate={setActiveTab} />;
-      case 'admin-console': return <AdminConsole users={users} setUsers={setUsers} organizations={organizations} setOrganizations={setOrganizations} persistChanges={persistGovernanceState} />;
+      case 'admin-console': return <AdminConsole users={users} setUsers={setUsers} organizations={organizations} setOrganizations={setOrganizations} persistChanges={persistGovernanceState} currentUserId={session.user?.id || null} />;
       default: return <Dashboard cashOnHand={0} totalRevenue={0} currency={currencyConfig} onNavigate={setActiveTab} activeLanguage={activeLanguage} />;
     }
   };
@@ -470,6 +467,7 @@ const App: React.FC = () => {
         onLogin={handleLogin}
         onVerifyMfa={() => {}}
         users={users}
+        organizations={organizations}
         onRegister={(newUser) => setUsers([...users, newUser])}
         taxConfig={taxConfig}
       />
