@@ -21,12 +21,43 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
   const [newUserOrgId, setNewUserOrgId] = useState('org-default');
   const [newUserRole, setNewUserRole] = useState<UserRole>('Staff');
   const [newUserDepartment, setNewUserDepartment] = useState<DepartmentName>('Administration');
+  const [newUserIdNumber, setNewUserIdNumber] = useState('');
+  const [newUserPhoneNumber, setNewUserPhoneNumber] = useState('');
+  const [newUserBirthMonthDay, setNewUserBirthMonthDay] = useState('');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editOrgId, setEditOrgId] = useState('');
   const [editRole, setEditRole] = useState<UserRole>('Staff');
+  const [editIdNumber, setEditIdNumber] = useState('');
+  const [editPhoneNumber, setEditPhoneNumber] = useState('');
+  const [editBirthMonthDay, setEditBirthMonthDay] = useState('');
 
   const roleOptions: UserRole[] = ['Platform Admin', 'Managing Director', 'Admin', 'Manager', 'Plant Manager', 'Finance', 'Store Keeper', 'Staff'];
   const departmentOptions: DepartmentName[] = ['Administration', 'Production', 'Distribution & Logistics', 'Quality Assurance', 'R&D', 'Sanitation', 'Welfare', 'Sales and Marketing', 'Stores', 'Finance', 'SuperAdmin', 'Security', 'Board of Directors'];
+
+  const isValidBirthdayToken = (value: string) => /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(value);
+
+  const StatusToggle = ({ enabled, onToggle, label }: { enabled: boolean; onToggle: () => void; label: string }) => (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={label}
+      className={`relative inline-flex h-7 w-14 items-center rounded-full border transition-colors ${enabled ? 'border-emerald-300 bg-emerald-500' : 'border-amber-300 bg-amber-400'}`}
+    >
+      <span
+        className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${enabled ? 'translate-x-8' : 'translate-x-1'}`}
+      />
+    </button>
+  );
+
+  const DeleteIcon = () => (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M19 6l-1 14H6L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </svg>
+  );
 
   const addOrganization = async () => {
     if (!orgName.trim()) {
@@ -70,12 +101,20 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       return;
     }
 
+    if (newUserBirthMonthDay && !isValidBirthdayToken(newUserBirthMonthDay.trim())) {
+      setStatusMessage('Birthday must use MM-DD format, for example 08-21.');
+      return;
+    }
+
     const user: User = {
       id: `u-${Date.now()}`,
       name: newUserName.trim(),
       identity: newUserIdentity.trim(),
       passwordHash: newUserPassword,
       isActive: true,
+      idNumber: newUserIdNumber.trim() || undefined,
+      phoneNumber: newUserPhoneNumber.trim() || undefined,
+      birthMonthDay: newUserBirthMonthDay.trim() || undefined,
       orgId: newUserOrgId || 'org-default',
       department: newUserDepartment,
       role: newUserRole,
@@ -95,6 +134,9 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     setNewUserOrgId('org-default');
     setNewUserRole('Staff');
     setNewUserDepartment('Administration');
+    setNewUserIdNumber('');
+    setNewUserPhoneNumber('');
+    setNewUserBirthMonthDay('');
     setStatusMessage(`User ${user.name} created.`);
   };
 
@@ -102,18 +144,36 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     setEditingUserId(user.id);
     setEditOrgId(user.orgId || '');
     setEditRole((user.role as UserRole) || 'Staff');
+    setEditIdNumber(user.idNumber || '');
+    setEditPhoneNumber(user.phoneNumber || '');
+    setEditBirthMonthDay(user.birthMonthDay || '');
   };
 
   const cancelEditUser = () => {
     setEditingUserId(null);
     setEditOrgId('');
     setEditRole('Staff');
+    setEditIdNumber('');
+    setEditPhoneNumber('');
+    setEditBirthMonthDay('');
   };
 
   const saveUserEdit = async (id: string) => {
+    if (editBirthMonthDay && !isValidBirthdayToken(editBirthMonthDay.trim())) {
+      setStatusMessage('Birthday must use MM-DD format, for example 08-21.');
+      return;
+    }
+
     const nextUsers = users.map(user => (
       user.id === id
-        ? { ...user, orgId: editOrgId || 'org-default', role: editRole }
+        ? {
+            ...user,
+            orgId: editOrgId || 'org-default',
+            role: editRole,
+            idNumber: editIdNumber.trim() || undefined,
+            phoneNumber: editPhoneNumber.trim() || undefined,
+            birthMonthDay: editBirthMonthDay.trim() || undefined,
+          }
         : user
     ));
     setUsers(nextUsers);
@@ -360,6 +420,33 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                   ))}
                 </select>
               </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">ID Number</label>
+                <input
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={newUserIdNumber}
+                  onChange={e => setNewUserIdNumber(e.target.value)}
+                  placeholder="CM-12345678"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Phone Number</label>
+                <input
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={newUserPhoneNumber}
+                  onChange={e => setNewUserPhoneNumber(e.target.value)}
+                  placeholder="+256700000000"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Birthday</label>
+                <input
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={newUserBirthMonthDay}
+                  onChange={e => setNewUserBirthMonthDay(e.target.value)}
+                  placeholder="MM-DD"
+                />
+              </div>
             </div>
 
             <div className="mt-4 flex justify-end">
@@ -386,6 +473,9 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                     <td className="px-6 py-4">
                       <div className="font-semibold">{u.name}</div>
                       <div className="text-xs text-slate-500">{u.identity}</div>
+                      <div className="mt-1 text-[11px] text-slate-400">
+                        {[u.idNumber ? `ID: ${u.idNumber}` : null, u.phoneNumber ? `Phone: ${u.phoneNumber}` : null, u.birthMonthDay ? `Birthday: ${u.birthMonthDay}` : null].filter(Boolean).join(' | ') || 'No extra profile details'}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${u.isActive === false ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'}`}>
@@ -427,29 +517,67 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                       <div className="flex items-center justify-end gap-2">
                         {editingUserId === u.id ? (
                           <>
-                            <button type="button" onClick={() => saveUserEdit(u.id)} className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold uppercase text-white">
-                              Save
-                            </button>
-                            <button type="button" onClick={cancelEditUser} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold uppercase text-slate-600">
-                              Cancel
-                            </button>
+                            <span className="text-xs font-bold uppercase text-slate-500">Editing</span>
                           </>
                         ) : (
                           <>
                             <button type="button" onClick={() => startEditUser(u)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50" aria-label={`Edit ${u.name}`}>
                               ✎
                             </button>
-                            <button type="button" onClick={() => toggleUserStatus(u.id)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold uppercase text-slate-700">
-                              {u.isActive === false ? 'Enable' : 'Disable'}
-                            </button>
-                            <button type="button" onClick={() => deleteUser(u.id)} className="rounded-lg border border-rose-200 px-3 py-2 text-xs font-bold uppercase text-rose-700">
-                              Delete
+                            <StatusToggle enabled={u.isActive !== false} onToggle={() => toggleUserStatus(u.id)} label={`${u.isActive === false ? 'Enable' : 'Disable'} ${u.name}`} />
+                            <button type="button" onClick={() => deleteUser(u.id)} className="rounded-lg border border-rose-200 p-2 text-rose-700" aria-label={`Delete ${u.name}`}>
+                              <DeleteIcon />
                             </button>
                           </>
                         )}
                       </div>
                     </td>
                   </tr>
+                {editingUserId === u.id && (
+                  <tr key={`${u.id}-editor`} className="bg-slate-50/70">
+                    <td colSpan={5} className="px-6 py-5">
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Organization</label>
+                          <select className="w-full p-3 rounded-xl bg-white border border-slate-200" value={editOrgId} onChange={e => setEditOrgId(e.target.value)}>
+                            <option value="">Unassigned</option>
+                            {organizations.map(org => (
+                              <option key={org.id} value={org.id}>{org.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Role</label>
+                          <select className="w-full p-3 rounded-xl bg-white border border-slate-200" value={editRole} onChange={e => setEditRole(e.target.value as UserRole)}>
+                            {roleOptions.map(role => (
+                              <option key={role} value={role}>{role}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">ID Number</label>
+                          <input className="w-full p-3 rounded-xl bg-white border border-slate-200" value={editIdNumber} onChange={e => setEditIdNumber(e.target.value)} placeholder="CM-12345678" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Phone Number</label>
+                          <input className="w-full p-3 rounded-xl bg-white border border-slate-200" value={editPhoneNumber} onChange={e => setEditPhoneNumber(e.target.value)} placeholder="+256700000000" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Birthday</label>
+                          <input className="w-full p-3 rounded-xl bg-white border border-slate-200" value={editBirthMonthDay} onChange={e => setEditBirthMonthDay(e.target.value)} placeholder="MM-DD" />
+                        </div>
+                      </div>
+                      <div className="mt-4 flex justify-end gap-3">
+                        <button type="button" onClick={cancelEditUser} className="rounded-xl border border-slate-200 px-4 py-3 text-xs font-bold uppercase text-slate-600">
+                          Cancel
+                        </button>
+                        <button type="button" onClick={() => saveUserEdit(u.id)} className="rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold uppercase text-white">
+                          Save Changes
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
                 ))}
               </tbody>
             </table>
