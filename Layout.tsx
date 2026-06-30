@@ -192,9 +192,13 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
                   <button onClick={() => setExpandedGroup(expandedGroup === group.label ? null : group.label)} className="w-full flex items-center justify-between px-4 py-2 app-nav-group hover:text-harvest-400 transition-colors">{group.label}</button>
                   {expandedGroup === group.label && (
                     <div className="space-y-1 animate-softFade">
-                      {group.items.map(item => (
-                        <button key={item.id} onClick={() => handleTabChange(item.id)} className={`app-side-tab ${activeTab === item.id ? 'is-active' : 'text-bakery-200 hover:bg-white/5'}`}>{item.icon} {t(item.translationKey)}</button>
-                      ))}
+                      {group.items.map(item => {
+                        const translatedLabel = t(item.translationKey);
+                        const resolvedLabel = translatedLabel === item.translationKey ? item.label : translatedLabel;
+                        return (
+                          <button key={item.id} onClick={() => handleTabChange(item.id)} className={`app-side-tab ${activeTab === item.id ? 'is-active' : 'text-bakery-200 hover:bg-white/5'}`}>{item.icon} {resolvedLabel}</button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

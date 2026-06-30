@@ -273,7 +273,7 @@ const App: React.FC = () => {
 
   const handleLogin = (user: User, token: string) => {
     setSession({ user, token, businessId: user.orgId, orgId: user.orgId });
-    if (['Platform Admin', 'Admin', 'Managing Director'].includes(user.role)) {
+    if (user.role === 'Platform Admin') {
       setActiveTab('admin-console');
       return;
     }

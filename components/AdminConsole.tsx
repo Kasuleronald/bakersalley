@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Organization, SubscriptionTier, User, UserRole } from '../types';
+import { DepartmentName, Organization, SubscriptionTier, User, UserRole } from '../types';
 
 interface AdminConsoleProps {
   users: User[];
@@ -12,9 +12,28 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
   const [activeTab, setActiveTab] = useState<'Organizations' | 'Users'>('Organizations');
   const [orgName, setOrgName] = useState('');
   const [orgTier, setOrgTier] = useState<SubscriptionTier>('Essentials');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserIdentity, setNewUserIdentity] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserOrgId, setNewUserOrgId] = useState('org-default');
+  const [newUserRole, setNewUserRole] = useState<UserRole>('Staff');
+  const [newUserDepartment, setNewUserDepartment] = useState<DepartmentName>('Administration');
+
+  const roleOptions: UserRole[] = ['Platform Admin', 'Managing Director', 'Admin', 'Manager', 'Plant Manager', 'Finance', 'Store Keeper', 'Staff'];
+  const departmentOptions: DepartmentName[] = ['Administration', 'Production', 'Distribution & Logistics', 'Quality Assurance', 'R&D', 'Sanitation', 'Welfare', 'Sales and Marketing', 'Stores', 'Finance', 'SuperAdmin', 'Security', 'Board of Directors'];
 
   const addOrganization = () => {
-    if (!orgName.trim()) return;
+    if (!orgName.trim()) {
+      setStatusMessage('Enter an organization name first.');
+      return;
+    }
+
+    if (organizations.some(org => org.name.toLowerCase() === orgName.trim().toLowerCase())) {
+      setStatusMessage('That organization already exists.');
+      return;
+    }
+
     const org: Organization = {
       id: `org-${Date.now()}`,
       name: orgName.trim(),
@@ -25,6 +44,48 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     setOrganizations([org, ...organizations]);
     setOrgName('');
     setOrgTier('Essentials');
+    setStatusMessage(`Organization ${org.name} added.`);
+  };
+
+  const addUser = () => {
+    if (!newUserName.trim() || !newUserIdentity.trim() || !newUserPassword.trim()) {
+      setStatusMessage('Name, identity, and password are required to create a user.');
+      return;
+    }
+
+    if (newUserPassword.length < 8) {
+      setStatusMessage('User password must be at least 8 characters.');
+      return;
+    }
+
+    if (users.some(user => user.identity.toLowerCase() === newUserIdentity.trim().toLowerCase())) {
+      setStatusMessage('That user identity already exists.');
+      return;
+    }
+
+    const user: User = {
+      id: `u-${Date.now()}`,
+      name: newUserName.trim(),
+      identity: newUserIdentity.trim(),
+      passwordHash: newUserPassword,
+      orgId: newUserOrgId || 'org-default',
+      department: newUserDepartment,
+      role: newUserRole,
+      mfaEnabled: false,
+      authorityLimit: 0,
+      hasConsentedToPrivacy: true,
+      seenFeatures: [],
+      systemVersion: '0.0.0',
+    };
+
+    setUsers([user, ...users]);
+    setNewUserName('');
+    setNewUserIdentity('');
+    setNewUserPassword('');
+    setNewUserOrgId('org-default');
+    setNewUserRole('Staff');
+    setNewUserDepartment('Administration');
+    setStatusMessage(`User ${user.name} created.`);
   };
 
   const updateUserRole = (id: string, role: UserRole | string) => {
@@ -55,6 +116,12 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
         </div>
       </div>
 
+      {statusMessage && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {statusMessage}
+        </div>
+      )}
+
       {activeTab === 'Organizations' && (
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
@@ -81,7 +148,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                 </select>
               </div>
               <div>
-                <button onClick={addOrganization} className="w-full p-3 rounded-xl bg-slate-900 text-white font-bold text-xs uppercase">
+                <button type="button" onClick={addOrganization} className="w-full p-3 rounded-xl bg-slate-900 text-white font-bold text-xs uppercase">
                   Add Organization
                 </button>
               </div>
@@ -112,49 +179,126 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       )}
 
       {activeTab === 'Users' && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-50 text-[10px] uppercase text-slate-500">
-                <th className="px-6 py-4">User</th>
-                <th className="px-6 py-4">Organization</th>
-                <th className="px-6 py-4">Role</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {users.map(u => (
-                <tr key={u.id}>
-                  <td className="px-6 py-4">
-                    <div className="font-semibold">{u.name}</div>
-                    <div className="text-xs text-slate-500">{u.identity}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <select
-                      className="p-2 rounded-lg bg-slate-50 border border-slate-100"
-                      value={u.orgId || ''}
-                      onChange={e => updateUserOrg(u.id, e.target.value)}
-                    >
-                      <option value="">Unassigned</option>
-                      {organizations.map(org => (
-                        <option key={org.id} value={org.id}>{org.name}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-6 py-4">
-                    <select
-                      className="p-2 rounded-lg bg-slate-50 border border-slate-100"
-                      value={u.role}
-                      onChange={e => updateUserRole(u.id, e.target.value)}
-                    >
-                      {(['Platform Admin', 'Managing Director', 'Admin', 'Manager', 'Plant Manager', 'Finance', 'Store Keeper', 'Staff'] as UserRole[]).map(role => (
-                        <option key={role} value={role}>{role}</option>
-                      ))}
-                    </select>
-                  </td>
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Full Name</label>
+                <input
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={newUserName}
+                  onChange={e => setNewUserName(e.target.value)}
+                  placeholder="Jane Doe"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Login Identity</label>
+                <input
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={newUserIdentity}
+                  onChange={e => setNewUserIdentity(e.target.value)}
+                  placeholder="jane@local.dev"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Password</label>
+                <input
+                  type="password"
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={newUserPassword}
+                  onChange={e => setNewUserPassword(e.target.value)}
+                  placeholder="Minimum 8 characters"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Organization</label>
+                <select
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={newUserOrgId}
+                  onChange={e => setNewUserOrgId(e.target.value)}
+                >
+                  {organizations.map(org => (
+                    <option key={org.id} value={org.id}>{org.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Role</label>
+                <select
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={newUserRole}
+                  onChange={e => setNewUserRole(e.target.value as UserRole)}
+                >
+                  {roleOptions.map(role => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Department</label>
+                <select
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                  value={newUserDepartment}
+                  onChange={e => setNewUserDepartment(e.target.value as DepartmentName)}
+                >
+                  {departmentOptions.map(department => (
+                    <option key={department} value={department}>{department}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <button type="button" onClick={addUser} className="px-5 py-3 rounded-xl bg-slate-900 text-white font-bold text-xs uppercase">
+                Create User
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 text-[10px] uppercase text-slate-500">
+                  <th className="px-6 py-4">User</th>
+                  <th className="px-6 py-4">Organization</th>
+                  <th className="px-6 py-4">Role</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {users.map(u => (
+                  <tr key={u.id}>
+                    <td className="px-6 py-4">
+                      <div className="font-semibold">{u.name}</div>
+                      <div className="text-xs text-slate-500">{u.identity}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <select
+                        className="p-2 rounded-lg bg-slate-50 border border-slate-100"
+                        value={u.orgId || ''}
+                        onChange={e => updateUserOrg(u.id, e.target.value)}
+                      >
+                        <option value="">Unassigned</option>
+                        {organizations.map(org => (
+                          <option key={org.id} value={org.id}>{org.name}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      <select
+                        className="p-2 rounded-lg bg-slate-50 border border-slate-100"
+                        value={u.role}
+                        onChange={e => updateUserRole(u.id, e.target.value)}
+                      >
+                        {roleOptions.map(role => (
+                          <option key={role} value={role}>{role}</option>
+                        ))}
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

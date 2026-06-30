@@ -1,7 +1,7 @@
 import { User } from '../types';
 
 export const TAB_PERMISSIONS: Record<string, string[]> = {
-  'admin-console': ['Platform Admin', 'Admin', 'Managing Director'],
+  'admin-console': ['Platform Admin'],
   settings: ['Platform Admin', 'Admin', 'Managing Director', 'Manager'],
   'mgmt-accountant': ['Platform Admin', 'Admin', 'Managing Director', 'Manager', 'Finance'],
   debtors: ['Platform Admin', 'Admin', 'Managing Director', 'Manager', 'Finance'],
