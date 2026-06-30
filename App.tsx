@@ -48,6 +48,18 @@ import { bakeryService } from './services/bakeryService';
 import { apiClient } from './services/apiClient';
 import { hasTabAccess } from './utils/accessControl';
 
+const mergeSeedUsers = (loadedUsers: User[] = []): User[] => {
+  const byIdentity = new Map(loadedUsers.map(user => [user.identity, user]));
+
+  for (const seedUser of INITIAL_USERS) {
+    if (!byIdentity.has(seedUser.identity)) {
+      byIdentity.set(seedUser.identity, seedUser);
+    }
+  }
+
+  return Array.from(byIdentity.values());
+};
+
 const App: React.FC = () => {
 
   // ── Session: restore from sessionStorage on load ────────────────────────
@@ -191,7 +203,7 @@ const App: React.FC = () => {
         if (db.accountGroups) setAccountGroups(db.accountGroups);
         if (db.wbTickets) setWbTickets(db.wbTickets);
         if (db.gatePasses) setGatePasses(db.gatePasses);
-        if (db.users) setUsers(db.users);
+        if (db.users) setUsers(mergeSeedUsers(db.users));
         if (db.agents) setAgents(db.agents);
         if (db.directives) setBoardDirectives(db.directives);
         if (db.qaLogs) setQaLogs(db.qaLogs);
