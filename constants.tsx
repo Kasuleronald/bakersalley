@@ -54,6 +54,7 @@ export const DEPARTMENTS: DepartmentName[] = [
 ];
 
 export const INITIAL_USERS: User[] = [
+  { id: 'u-platform-admin', name: 'Local Platform Admin', identity: 'platform.admin@local.dev', passwordHash: 'admin1234', orgId: 'org-default', department: 'SuperAdmin', role: 'Platform Admin', authorityLimit: 9999999999, mfaEnabled: true, hasConsentedToPrivacy: true, seenFeatures: [], systemVersion: '0.0.0' },
   { id: 'u-md', name: 'Dr. David Kato', identity: 'md@nissi-industries.com', passwordHash: 'md123', orgId: 'org-default', department: 'Administration', role: 'Managing Director', authorityLimit: 1000000000, mfaEnabled: true, hasConsentedToPrivacy: true, seenFeatures: [], systemVersion: '0.0.0' },
   { id: 'u-ops', name: 'Sarah Nabukeera', identity: 'ops@nissi-industries.com', passwordHash: 'ops123', orgId: 'org-default', department: 'Production', role: 'Plant Manager', authorityLimit: 50000000, mfaEnabled: true, hasConsentedToPrivacy: true, seenFeatures: [], systemVersion: '0.0.0' }
 ];
