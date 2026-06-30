@@ -92,6 +92,15 @@
 				"status",
 				"--short"
 			]
+		},
+		{
+			"label": "lint-adminconsole-birthday-fix",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"lint"
+			]
 		}
 	]
 }
