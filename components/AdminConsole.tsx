@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DepartmentName, Organization, SubscriptionTier, User, UserRole } from '../types';
 
 interface AdminConsoleProps {
@@ -23,18 +23,85 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
   const [newUserDepartment, setNewUserDepartment] = useState<DepartmentName>('Administration');
   const [newUserIdNumber, setNewUserIdNumber] = useState('');
   const [newUserPhoneNumber, setNewUserPhoneNumber] = useState('');
-  const [newUserBirthMonthDay, setNewUserBirthMonthDay] = useState('');
+  const [newUserBirthMonth, setNewUserBirthMonth] = useState('');
+  const [newUserBirthDay, setNewUserBirthDay] = useState('');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editOrgId, setEditOrgId] = useState('');
   const [editRole, setEditRole] = useState<UserRole>('Staff');
   const [editIdNumber, setEditIdNumber] = useState('');
   const [editPhoneNumber, setEditPhoneNumber] = useState('');
-  const [editBirthMonthDay, setEditBirthMonthDay] = useState('');
+  const [editBirthMonth, setEditBirthMonth] = useState('');
+  const [editBirthDay, setEditBirthDay] = useState('');
 
   const roleOptions: UserRole[] = ['Platform Admin', 'Managing Director', 'Admin', 'Manager', 'Plant Manager', 'Finance', 'Store Keeper', 'Staff'];
   const departmentOptions: DepartmentName[] = ['Administration', 'Production', 'Distribution & Logistics', 'Quality Assurance', 'R&D', 'Sanitation', 'Welfare', 'Sales and Marketing', 'Stores', 'Finance', 'SuperAdmin', 'Security', 'Board of Directors'];
 
-  const isValidBirthdayToken = (value: string) => /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(value);
+  const monthOptions = [
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+  ];
+
+  const getDaysInMonth = (month: string): number => {
+    switch (month) {
+      case '01':
+      case '03':
+      case '05':
+      case '07':
+      case '08':
+      case '10':
+      case '12':
+        return 31;
+      case '04':
+      case '06':
+      case '09':
+      case '11':
+        return 30;
+      case '02':
+        return 29;
+      default:
+        return 0;
+    }
+  };
+
+  const createDayOptions = useMemo(() => {
+    const totalDays = getDaysInMonth(newUserBirthMonth);
+    return Array.from({ length: totalDays }, (_, index) => String(index + 1).padStart(2, '0'));
+  }, [newUserBirthMonth]);
+
+  const editDayOptions = useMemo(() => {
+    const totalDays = getDaysInMonth(editBirthMonth);
+    return Array.from({ length: totalDays }, (_, index) => String(index + 1).padStart(2, '0'));
+  }, [editBirthMonth]);
+
+  useEffect(() => {
+    if (!newUserBirthMonth) {
+      setNewUserBirthDay('');
+      return;
+    }
+    if (newUserBirthDay && Number(newUserBirthDay) > getDaysInMonth(newUserBirthMonth)) {
+      setNewUserBirthDay('');
+    }
+  }, [newUserBirthDay, newUserBirthMonth]);
+
+  useEffect(() => {
+    if (!editBirthMonth) {
+      setEditBirthDay('');
+      return;
+    }
+    if (editBirthDay && Number(editBirthDay) > getDaysInMonth(editBirthMonth)) {
+      setEditBirthDay('');
+    }
+  }, [editBirthDay, editBirthMonth]);
 
   const StatusToggle = ({ enabled, onToggle, label }: { enabled: boolean; onToggle: () => void; label: string }) => (
     <button
@@ -106,10 +173,12 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       return;
     }
 
-    if (newUserBirthMonthDay && !isValidBirthdayToken(newUserBirthMonthDay.trim())) {
-      setStatusMessage('Birthday must use MM-DD format, for example 08-21.');
+    if ((newUserBirthMonth && !newUserBirthDay) || (!newUserBirthMonth && newUserBirthDay)) {
+      setStatusMessage('Select both birthday month and day.');
       return;
     }
+
+    const birthMonthDay = newUserBirthMonth && newUserBirthDay ? `${newUserBirthMonth}-${newUserBirthDay}` : undefined;
 
     const user: User = {
       id: `u-${Date.now()}`,
@@ -119,7 +188,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
       isActive: true,
       idNumber: newUserIdNumber.trim() || undefined,
       phoneNumber: newUserPhoneNumber.trim() || undefined,
-      birthMonthDay: newUserBirthMonthDay.trim() || undefined,
+      birthMonthDay,
       orgId: newUserOrgId || 'org-default',
       department: newUserDepartment,
       role: newUserRole,
@@ -141,7 +210,8 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     setNewUserDepartment('Administration');
     setNewUserIdNumber('');
     setNewUserPhoneNumber('');
-    setNewUserBirthMonthDay('');
+    setNewUserBirthMonth('');
+    setNewUserBirthDay('');
     showSuccessDialog(`User ${user.name} created successfully.`);
   };
 
@@ -151,7 +221,9 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     setEditRole((user.role as UserRole) || 'Staff');
     setEditIdNumber(user.idNumber || '');
     setEditPhoneNumber(user.phoneNumber || '');
-    setEditBirthMonthDay(user.birthMonthDay || '');
+    const [month = '', day = ''] = (user.birthMonthDay || '').split('-');
+    setEditBirthMonth(month);
+    setEditBirthDay(day);
   };
 
   const cancelEditUser = () => {
@@ -160,14 +232,17 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
     setEditRole('Staff');
     setEditIdNumber('');
     setEditPhoneNumber('');
-    setEditBirthMonthDay('');
+    setEditBirthMonth('');
+    setEditBirthDay('');
   };
 
   const saveUserEdit = async (id: string) => {
-    if (editBirthMonthDay && !isValidBirthdayToken(editBirthMonthDay.trim())) {
-      setStatusMessage('Birthday must use MM-DD format, for example 08-21.');
+    if ((editBirthMonth && !editBirthDay) || (!editBirthMonth && editBirthDay)) {
+      setStatusMessage('Select both birthday month and day.');
       return;
     }
+
+    const editBirthMonthDay = editBirthMonth && editBirthDay ? `${editBirthMonth}-${editBirthDay}` : undefined;
 
     const nextUsers = users.map(user => (
       user.id === id
@@ -177,7 +252,7 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
             role: editRole,
             idNumber: editIdNumber.trim() || undefined,
             phoneNumber: editPhoneNumber.trim() || undefined,
-            birthMonthDay: editBirthMonthDay.trim() || undefined,
+            birthMonthDay: editBirthMonthDay,
           }
         : user
     ));
@@ -465,12 +540,29 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Birthday</label>
-                <input
-                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
-                  value={newUserBirthMonthDay}
-                  onChange={e => setNewUserBirthMonthDay(e.target.value)}
-                  placeholder="MM-DD"
-                />
+                <div className="grid grid-cols-2 gap-2">
+                  <select
+                    className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                    value={newUserBirthMonth}
+                    onChange={e => setNewUserBirthMonth(e.target.value)}
+                  >
+                    <option value="">Month</option>
+                    {monthOptions.map(month => (
+                      <option key={month.value} value={month.value}>{month.label}</option>
+                    ))}
+                  </select>
+                  <select
+                    className="w-full p-3 rounded-xl bg-slate-50 border border-slate-100"
+                    value={newUserBirthDay}
+                    onChange={e => setNewUserBirthDay(e.target.value)}
+                    disabled={!newUserBirthMonth}
+                  >
+                    <option value="">Day</option>
+                    {createDayOptions.map(day => (
+                      <option key={day} value={day}>{day}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -590,7 +682,20 @@ const AdminConsole: React.FC<AdminConsoleProps> = ({ users, setUsers, organizati
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Birthday</label>
-                          <input className="w-full p-3 rounded-xl bg-white border border-slate-200" value={editBirthMonthDay} onChange={e => setEditBirthMonthDay(e.target.value)} placeholder="MM-DD" />
+                          <div className="grid grid-cols-2 gap-2">
+                            <select className="w-full p-3 rounded-xl bg-white border border-slate-200" value={editBirthMonth} onChange={e => setEditBirthMonth(e.target.value)}>
+                              <option value="">Month</option>
+                              {monthOptions.map(month => (
+                                <option key={month.value} value={month.value}>{month.label}</option>
+                              ))}
+                            </select>
+                            <select className="w-full p-3 rounded-xl bg-white border border-slate-200" value={editBirthDay} onChange={e => setEditBirthDay(e.target.value)} disabled={!editBirthMonth}>
+                              <option value="">Day</option>
+                              {editDayOptions.map(day => (
+                                <option key={day} value={day}>{day}</option>
+                              ))}
+                            </select>
+                          </div>
                         </div>
                       </div>
                       <div className="mt-4 flex justify-end gap-3">
