@@ -72,7 +72,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, sess
         { id: 'pc', label: 'Personnel', icon: '👥', tier: 'Essentials', translationKey: 'people' },
         { id: 'payroll', label: 'Payroll & Statutory', icon: '💸', tier: 'Pro', translationKey: 'payroll' },
         { id: 'neural-hub', label: 'Neural Hub', icon: '🧠', tier: 'Enterprise', translationKey: 'neural_hub' },
-        { id: 'admin-console', label: 'Admin Console', icon: '🛡️', tier: 'Enterprise', translationKey: 'settings' },
+        { id: 'admin-console', label: 'Admin Console', icon: '🛡️', tier: 'Enterprise', translationKey: 'admin_console' },
         { id: 'settings', label: 'System Settings', icon: '⚙️', tier: 'Essentials', translationKey: 'settings' },
       ]
     }
