@@ -472,7 +472,19 @@ switch($action) {
 
         $orgId = $token_payload['orgId'] ?? 'org-default';
         $tenantData = $db['tenants'][$orgId] ?? [];
-        echo json_encode($tenantData);
+        $responseData = $tenantData;
+
+        if (in_array($token_payload['role'], ['Platform Admin', 'Admin', 'Managing Director'])) {
+            $responseData['users'] = $db['users'];
+            $responseData['organizations'] = $db['organizations'];
+        } else {
+            $responseData['organizations'] = array_values(array_filter(
+                $db['organizations'],
+                fn($org) => ($org['id'] ?? '') === $orgId
+            ));
+        }
+
+        echo json_encode($responseData);
         break;
 
     case 'write':
@@ -483,8 +495,8 @@ switch($action) {
             exit;
         }
 
-        // RBAC interlock: allow governance-capable roles to persist tenant data.
-        if (!in_array($token_payload['role'], ['Platform Admin', 'Admin', 'Manager', 'Managing Director'])) {
+        // RBAC interlock: allow approved business roles to persist tenant data.
+        if (!in_array($token_payload['role'], ['Platform Admin', 'Admin', 'Managing Director', 'Manager', 'Plant Manager', 'Finance', 'Store Keeper'])) {
             http_response_code(403);
             echo json_encode(["status" => "error", "message" => "Insufficient permissions for write action."]);
             exit;
@@ -497,7 +509,9 @@ switch($action) {
         if ($data_to_save && is_array($data_to_save)) {
             $db = normalize_multitenant_db(json_decode(file_get_contents($DATA_FILE), true));
             $orgId = $token_payload['orgId'] ?? 'org-default';
-            $db['tenants'][$orgId] = $data_to_save;
+            $tenantDataToSave = $data_to_save;
+            unset($tenantDataToSave['users'], $tenantDataToSave['organizations']);
+            $db['tenants'][$orgId] = $tenantDataToSave;
 
             if (in_array($token_payload['role'], ['Admin', 'Managing Director', 'Platform Admin'])) {
                 if (isset($data_to_save['users']) && is_array($data_to_save['users'])) {
