@@ -466,7 +466,7 @@ const App: React.FC = () => {
     }
 
     switch (activeTab) {
-      case 'dashboard': return <Dashboard cashOnHand={1000000} totalRevenue={5000000} currency={currencyConfig} onNavigate={setActiveTab} activeLanguage={activeLanguage} />;
+      case 'dashboard': return <Dashboard cashOnHand={0} totalRevenue={0} currency={currencyConfig} onNavigate={setActiveTab} activeLanguage={activeLanguage} />;
       case 'mgmt-accountant': return <ManagementAccountant {...commonProps} />;
       case 'cost-accountant': return <CostAccountant {...commonProps} />;
       case 'debtors': return <DebtManager {...commonProps} />;
