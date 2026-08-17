@@ -281,12 +281,16 @@ const App: React.FC = () => {
     const debounceSave = setTimeout(saveData, 1500);
     return () => clearTimeout(debounceSave);
   }, [
+    // users/organizations deliberately excluded — those are persisted explicitly via
+    // persistGovernanceState (Admin Console), which sends the full, deliberate user list.
+    // Including them here let this generic autosave refire mid-hydration with a stale/partial
+    // users array, which previously wiped a user's passwordHash via the server's merge logic.
     taxConfig, skus, ingredients, activities, overheads, employees,
     transactions, productionLogs, sales, customers, orders,
     outlets, finishedGoods, outletStocks, inventoryLosses,
     requisitions, loans, invoices, forecasts, outletForecasts,
     movements, assets, suppliers, budgets, accountGroups,
-    wbTickets, gatePasses, users, agents, qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile, organizations
+    wbTickets, gatePasses, agents, qaLogs, rmQaLogs, payments, leaveApplications, leads, businessProfile
   ]);
 
   const canAccessTab = (tabId: string) => hasTabAccess(session.user, tabId);
