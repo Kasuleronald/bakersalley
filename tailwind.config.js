@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Work Sans', 'Arial', 'sans-serif'],
-        serif: ['Petrona', 'Georgia', 'serif'],
+        sans: ['Open Sans', 'Arial', 'sans-serif'],
+        serif: ['Roboto', 'Arial', 'sans-serif'],
         },
       colors: {
         harvest: {
