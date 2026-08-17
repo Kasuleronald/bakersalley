@@ -48,6 +48,30 @@ const flattenContentsToPrompt = (contents: any): string => {
   return JSON.stringify(contents || {});
 };
 
+// Finds the first { inlineData: { mimeType, data } } part in a contents payload, however it's shaped
+// (a bare parts array, or an array of { parts } items) — mirrors flattenContentsToPrompt's traversal.
+const extractInlineData = (contents: any): { mimeType: string; data: string } | undefined => {
+  const fromParts = (parts: any): { mimeType: string; data: string } | undefined => {
+    if (!Array.isArray(parts)) return undefined;
+    for (const p of parts) {
+      if (p?.inlineData?.data && p?.inlineData?.mimeType) {
+        return { mimeType: p.inlineData.mimeType, data: p.inlineData.data };
+      }
+    }
+    return undefined;
+  };
+
+  if (Array.isArray(contents)) {
+    for (const item of contents) {
+      const found = fromParts(item?.parts);
+      if (found) return found;
+    }
+    return undefined;
+  }
+
+  return fromParts(contents?.parts);
+};
+
 export class GoogleGenAI {
   constructor(_opts?: { apiKey?: string }) {}
 
@@ -58,6 +82,7 @@ export class GoogleGenAI {
         model: params.model,
         responseMimeType: params?.config?.responseMimeType,
         systemInstruction: params?.config?.systemInstruction,
+        fileData: extractInlineData(params.contents),
       });
 
       if (text === null) {
@@ -73,6 +98,7 @@ export class GoogleGenAI {
         model: params.model,
         responseMimeType: params?.config?.responseMimeType,
         systemInstruction: params?.config?.systemInstruction,
+        fileData: extractInlineData(params.contents),
       });
 
       if (text === null) {
