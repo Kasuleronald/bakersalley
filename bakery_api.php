@@ -538,9 +538,16 @@ switch($action) {
         $model = trim((string)($input['model'] ?? 'gemini-3-flash-preview'));
         $responseMimeType = trim((string)($input['responseMimeType'] ?? ''));
         $systemInstruction = trim((string)($input['systemInstruction'] ?? ''));
+        $fileData = is_array($input['fileData'] ?? null) ? $input['fileData'] : null;
 
         if ($prompt === '') {
             json_response(400, ["status" => "error", "message" => "Prompt is required"]);
+        }
+
+        // Base64 data expands ~33% and Gemini's request-size limits are generous, but keep an
+        // explicit ceiling here so a runaway upload can't tie up the PHP worker indefinitely.
+        if ($fileData && strlen((string)($fileData['data'] ?? '')) > 30 * 1024 * 1024) {
+            json_response(413, ["status" => "error", "message" => "File is too large for AI analysis (max ~20MB)."]);
         }
 
         $allowedModels = [
@@ -552,7 +559,7 @@ switch($action) {
             json_response(400, ["status" => "error", "message" => "Unsupported model"]);
         }
 
-        $aiResult = call_gemini_proxy($GEMINI_API_KEY, $model, $prompt, $systemInstruction, $responseMimeType);
+        $aiResult = call_gemini_proxy($GEMINI_API_KEY, $model, $prompt, $systemInstruction, $responseMimeType, $fileData);
         if (!$aiResult['ok']) {
             json_response($aiResult['status'], ["status" => "error", "message" => $aiResult['error']]);
         }
