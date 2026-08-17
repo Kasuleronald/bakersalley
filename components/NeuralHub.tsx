@@ -86,13 +86,21 @@ const NeuralHub: React.FC<NeuralHubProps> = ({
         id: `ocr-${Date.now()}`,
         date: data.date || new Date().toISOString(),
         amount: data.totalAmount,
-        description: `Vision Transcribed: ${data.vendorName} - ${data.notes || ''}`,
+        description: `Vision Transcribed (${scanDocType}): ${data.vendorName} - ${data.notes || ''}`,
         type: 'Debit',
         account: 'Cash',
         category: 'Expense',
         isOcrVerified: true
     };
     setTransactions([newTx, ...transactions]);
+    setScanHistory([{
+      id: newTx.id,
+      title: `${scanDocType} Scan`,
+      original: `✍️ "${data.vendorName || 'Unknown'} — ${data.notes || 'No notes'}"`,
+      transcribed: { vendor: data.vendorName, amount: data.totalAmount, category: data.categoryHint, date: data.date },
+      confidence: 92,
+      status: 'Journalized'
+    }, ...scanHistory]);
     setAiResponse(`✅ Digitization Successful: Logged ${currency.format(data.totalAmount)}.`);
   };
 
