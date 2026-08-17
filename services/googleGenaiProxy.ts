@@ -60,9 +60,11 @@ export class GoogleGenAI {
         systemInstruction: params?.config?.systemInstruction,
       });
 
-      return {
-        text: text || '',
-      };
+      if (text === null) {
+        throw new Error('AI request failed. Check the backend AI configuration and try again.');
+      }
+
+      return { text };
     },
 
     generateContentStream: async (params: GenerateParams) => {
@@ -73,8 +75,12 @@ export class GoogleGenAI {
         systemInstruction: params?.config?.systemInstruction,
       });
 
+      if (text === null) {
+        throw new Error('AI request failed. Check the backend AI configuration and try again.');
+      }
+
       async function* stream() {
-        yield { text: text || '' };
+        yield { text };
       }
 
       return stream();
