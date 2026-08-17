@@ -47,6 +47,10 @@ const NeuralHub: React.FC<NeuralHubProps> = ({
   const [edgeSensors, setEdgeSensors] = useState<SensorData[]>([]);
   const [isInventoryProcessing, setIsInventoryProcessing] = useState(false);
   const [inventoryResponse, setInventoryResponse] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importFileName, setImportFileName] = useState<string | null>(null);
+  const [importPreview, setImportPreview] = useState<Array<{ name: string; unit: string; costPerUnit: number; currentStock: number; reorderLevel: number; category: string }> | null>(null);
 
   useEffect(() => {
     if (activeMode !== 'Edge') return;
