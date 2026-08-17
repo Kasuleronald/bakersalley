@@ -209,6 +209,30 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
             <button onClick={handleSave} disabled={isSaving} className="bg-indigo-900 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg hover:bg-black transition-all">
               {isSaving ? 'Synchronizing...' : 'Save Profile Updates'}
             </button>
+
+            <div className="pt-6 border-t border-slate-100 space-y-4">
+              <div>
+                <h4 className="text-lg font-bold font-serif text-slate-900">AI Architect</h4>
+                <p className="text-xs text-slate-400 mt-1">
+                  Describe your industry and let AI recalibrate terminology, QC specs, and suggested cost-driver activities for your business. Leave blank and run it to reset to native Bakery standards.
+                </p>
+              </div>
+              <div className="flex flex-col md:flex-row gap-3">
+                <input
+                  className="flex-1 p-4 bg-slate-50 border-none rounded-2xl font-bold"
+                  placeholder="e.g. Artisan cheese dairy, industrial abattoir..."
+                  value={customIndustryDesc}
+                  onChange={e => setCustomIndustryDesc(e.target.value)}
+                />
+                <button
+                  onClick={handleArchitectIndustry}
+                  disabled={isArchitectLoading}
+                  className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg hover:bg-black transition-all whitespace-nowrap"
+                >
+                  {isArchitectLoading ? 'Architecting...' : 'Run AI Architect'}
+                </button>
+              </div>
+            </div>
           </div>
           <aside className="lg:col-span-4 bg-indigo-900 p-8 rounded-[3.5rem] text-white shadow-xl flex flex-col justify-center text-center space-y-6 border border-white/10">
             <div className="text-6xl">🏢</div>
