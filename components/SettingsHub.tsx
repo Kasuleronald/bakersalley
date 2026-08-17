@@ -220,6 +220,81 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
         </div>
       )}
 
+      {activeTab === 'Profile' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fadeIn">
+          <div className="lg:col-span-8 bg-white p-10 rounded-[4rem] border border-slate-100 shadow-sm space-y-6">
+            <div>
+              <h4 className="text-lg font-bold font-serif text-slate-900">Security · Change Password</h4>
+              <p className="text-xs text-slate-400 mt-1">Update the password for your own account ({currentUser.identity}).</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Current Password</label>
+                <input
+                  type="password"
+                  className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold"
+                  value={currentPassword}
+                  onChange={e => setCurrentPassword(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">New Password</label>
+                <input
+                  type="password"
+                  className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Confirm New Password</label>
+                <input
+                  type="password"
+                  className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                />
+              </div>
+            </div>
+            {passwordStatus.type === 'error' && (
+              <p className="text-xs font-bold text-red-600">{passwordStatus.message}</p>
+            )}
+            {passwordStatus.type === 'success' && (
+              <p className="text-xs font-bold text-emerald-600">{passwordStatus.message}</p>
+            )}
+            <button
+              onClick={handleChangePassword}
+              disabled={passwordStatus.type === 'saving'}
+              className="bg-indigo-900 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg hover:bg-black transition-all"
+            >
+              {passwordStatus.type === 'saving' ? 'Updating...' : 'Update Password'}
+            </button>
+          </div>
+
+          {isAdminRole && (
+            <div className="lg:col-span-4 bg-red-50 border border-red-200 p-8 rounded-[3.5rem] space-y-4">
+              <h4 className="text-lg font-bold font-serif text-red-700">Danger Zone</h4>
+              <p className="text-xs text-red-600 leading-relaxed">
+                Permanently clears all ingredients, SKUs, sales, transactions, employees, outlets and other business records for this tenant. Users and organization settings are kept.
+              </p>
+              {resetStatus.type === 'error' && (
+                <p className="text-xs font-bold text-red-700">{resetStatus.message}</p>
+              )}
+              {resetStatus.type === 'success' && (
+                <p className="text-xs font-bold text-emerald-700">{resetStatus.message}</p>
+              )}
+              <button
+                onClick={handleResetTenantData}
+                disabled={isResettingData}
+                className="bg-red-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase shadow-lg hover:bg-red-700 transition-all"
+              >
+                {isResettingData ? 'Clearing...' : 'Clear Demo / Business Data'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {activeTab === 'Nexus' && (
         <GoogleDriveSync allState={allState} onImport={onImportData} businessProfile={businessProfile} setBusinessProfile={setBusinessProfile} />
       )}
