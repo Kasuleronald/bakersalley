@@ -113,6 +113,7 @@ class ApiClient {
     model?: string;
     responseMimeType?: string;
     systemInstruction?: string;
+    fileData?: { mimeType: string; data: string };
   }): Promise<string | null> {
     const config = this.getCloudConfig();
     const token = this.getToken();
