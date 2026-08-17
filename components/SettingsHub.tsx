@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 // Fixed: Removed missing and unused JurisdictionID import from types
 import { TaxConfig, CurrencyCode, User, IndustryProfile, Activity, SKU, SubscriptionTier, LanguageCode, CostingMethod, BusinessProfile } from '../types';
 import { generateIndustryBlueprint } from '../services/geminiService';
+import { apiClient } from '../services/apiClient';
 import SubscriptionManager from './SubscriptionManager';
 import GoogleDriveSync from './GoogleDriveSync';
 
