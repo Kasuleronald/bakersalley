@@ -9,5 +9,5 @@ export default defineConfig({
       '@google/genai': path.resolve(__dirname, 'services/googleGenaiProxy.ts')
     }
   },
-  base: '/bakersalley/',
+  base: '/',
 })

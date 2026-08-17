@@ -1,4 +1,3 @@
-
 <?php
 /**
  * BakersAlley Enterprise Backend - Security Hardened v3.2
