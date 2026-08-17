@@ -188,6 +188,53 @@ class ApiClient {
     }
   }
 
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ status: string; message?: string }> {
+    const config = this.getCloudConfig();
+    const token = this.getToken();
+    if (!config?.url || !token) {
+      return { status: 'error', message: 'Not connected to a backend.' };
+    }
+
+    try {
+      const response = await fetch(`${config.url}?action=change_password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      console.error("Change password request failed:", e);
+      return { status: 'error', message: 'Request failed.' };
+    }
+  }
+
+  async resetTenantData(): Promise<{ status: string; message?: string }> {
+    const config = this.getCloudConfig();
+    const token = this.getToken();
+    if (!config?.url || !token) {
+      return { status: 'error', message: 'Not connected to a backend.' };
+    }
+
+    try {
+      const response = await fetch(`${config.url}?action=reset_tenant_data`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        }
+      });
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      console.error("Reset tenant data request failed:", e);
+      return { status: 'error', message: 'Request failed.' };
+    }
+  }
+
   async patchFullState(patch: any): Promise<any> {
     const db = await this.getDb();
     const updatedDb = { ...db, ...patch };
