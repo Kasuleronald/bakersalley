@@ -6,6 +6,8 @@ import ModuleAiInteraction from './ModuleAiInteraction';
 import AIScanner from './AIScanner';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar, Legend, AreaChart, Area, ComposedChart, Line } from 'recharts';
 import { getConversionFactor } from '../utils/conversionUtils';
+import { readSpreadsheetAsText, readFileAsBase64 } from '../utils/importUtils';
+import { analyzeImportedDocument } from '../services/geminiService';
 
 interface NeuralHubProps {
   transactions: Transaction[];
