@@ -533,9 +533,8 @@ switch($action) {
         }
 
         $allowedModels = [
-            'gemini-2.0-flash',
-            'gemini-3-pro-preview',
             'gemini-3-flash-preview',
+            'gemini-3-pro-preview',
             'gemini-3-pro-image-preview',
         ];
         if (!in_array($model, $allowedModels, true)) {
