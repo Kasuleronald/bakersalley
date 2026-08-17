@@ -436,6 +436,85 @@ switch($action) {
         json_response(201, ["status" => "success", "user" => $newUser]);
         break;
 
+    case 'change_password':
+        $token_payload = verify_token($auth_header, $TOKEN_SECRET);
+        if (!$token_payload) {
+            json_response(403, ["status" => "error", "message" => "Session expired or invalid"]);
+        }
+
+        $raw_input = file_get_contents('php://input');
+        $input = json_decode($raw_input, true);
+        $currentPassword = (string)($input['currentPassword'] ?? '');
+        $newPassword = (string)($input['newPassword'] ?? '');
+
+        if ($newPassword === '' || strlen($newPassword) < 8) {
+            json_response(400, ["status" => "error", "message" => "New password must be at least 8 characters."]);
+        }
+
+        $db = normalize_multitenant_db(json_decode(file_get_contents($DATA_FILE), true));
+        $uid = $token_payload['uid'] ?? null;
+        $userIndex = null;
+        foreach ($db['users'] as $i => $u) {
+            if (($u['id'] ?? null) === $uid) {
+                $userIndex = $i;
+                break;
+            }
+        }
+
+        if ($userIndex === null) {
+            json_response(404, ["status" => "error", "message" => "Account not found."]);
+        }
+
+        $hash = $db['users'][$userIndex]['passwordHash'] ?? '';
+        $currentOk = $hash !== '' && (
+            user_has_bcrypt_hash($hash) ? password_verify($currentPassword, $hash) : hash_equals($hash, $currentPassword)
+        );
+
+        if (!$currentOk) {
+            json_response(401, ["status" => "error", "message" => "Current password is incorrect."]);
+        }
+
+        $db['users'][$userIndex]['passwordHash'] = password_hash($newPassword, PASSWORD_BCRYPT);
+        save_db($DATA_FILE, $db);
+        json_response(200, ["status" => "success", "message" => "Password updated."]);
+        break;
+
+    case 'reset_tenant_data':
+        $token_payload = verify_token($auth_header, $TOKEN_SECRET);
+        if (!$token_payload) {
+            json_response(403, ["status" => "error", "message" => "Session expired or invalid"]);
+        }
+        if (!in_array($token_payload['role'], ['Platform Admin', 'Admin', 'Managing Director'])) {
+            json_response(403, ["status" => "error", "message" => "Insufficient permissions."]);
+        }
+
+        $db = normalize_multitenant_db(json_decode(file_get_contents($DATA_FILE), true));
+        $orgId = $token_payload['orgId'] ?? 'org-default';
+        $currentTenant = $db['tenants'][$orgId] ?? [];
+
+        $clearedTenant = [
+            "ingredients" => [],
+            "skus" => [],
+            "sales" => [],
+            "transactions" => [],
+            "productionLogs" => [],
+            "activities" => [],
+            "overheads" => [],
+            "employees" => [],
+            "customers" => [],
+            "orders" => [],
+            "outlets" => [],
+            "finishedGoods" => []
+        ];
+        if (isset($currentTenant['taxConfig'])) {
+            $clearedTenant['taxConfig'] = $currentTenant['taxConfig'];
+        }
+
+        $db['tenants'][$orgId] = $clearedTenant;
+        save_db($DATA_FILE, $db);
+        json_response(200, ["status" => "success", "message" => "Tenant business data cleared."]);
+        break;
+
     case 'ai_proxy':
         $token_payload = verify_token($auth_header, $TOKEN_SECRET);
         if (!$token_payload) {
