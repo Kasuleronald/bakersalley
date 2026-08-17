@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Open Sans', 'Arial', 'sans-serif'],
-        serif: ['Roboto', 'Arial', 'sans-serif'],
+        sans: ['Raleway', 'Arial', 'sans-serif'],
+        serif: ['Raleway', 'Arial', 'sans-serif'],
         },
       colors: {
         harvest: {
