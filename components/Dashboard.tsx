@@ -31,8 +31,8 @@ const Dashboard: React.FC<DashboardProps> = ({ cashOnHand, totalRevenue, currenc
   const stats: StatItem[] = [
     { label: t('market_liquidity'), value: cashOnHand, icon: '🏦', sub: 'Verified Treasury', targetTab: 'banking' },
     { label: t('revenue_pool'), value: totalRevenue, icon: '💰', sub: 'Life-to-Date', targetTab: 'sales' },
-    { label: t('in_transit'), value: 1250, icon: '🚚', sub: 'Factory to Branch', targetTab: 'logistics', isUnits: true },
-    { label: t('burn_rate'), value: 450000, icon: '🔥', sub: 'Daily Outflow', targetTab: 'expenses' }
+    { label: t('in_transit'), value: 0, icon: '🚚', sub: 'Factory to Branch', targetTab: 'logistics', isUnits: true },
+    { label: t('burn_rate'), value: 0, icon: '🔥', sub: 'Daily Outflow', targetTab: 'expenses' }
   ];
 
   const categories = [
