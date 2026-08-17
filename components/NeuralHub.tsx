@@ -43,6 +43,8 @@ const NeuralHub: React.FC<NeuralHubProps> = ({
   const [scanDocType, setScanDocType] = useState<'Receipt' | 'Invoice' | 'Production Log'>('Receipt');
   const [scanHistory, setScanHistory] = useState(MOCK_SCAN_HISTORY);
   const [edgeSensors, setEdgeSensors] = useState<SensorData[]>([]);
+  const [isInventoryProcessing, setIsInventoryProcessing] = useState(false);
+  const [inventoryResponse, setInventoryResponse] = useState<string | null>(null);
 
   useEffect(() => {
     if (activeMode !== 'Edge') return;
