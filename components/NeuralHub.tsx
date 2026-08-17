@@ -82,6 +82,20 @@ const NeuralHub: React.FC<NeuralHubProps> = ({
     });
   }, [sales, revenueShock, sageMetrics]);
 
+  const lowStockIngredients = useMemo(() => {
+    return ingredients
+      .filter(i => i.currentStock <= i.reorderLevel)
+      .sort((a, b) => (a.currentStock / (a.reorderLevel || 1)) - (b.currentStock / (b.reorderLevel || 1)));
+  }, [ingredients]);
+
+  const inventoryValue = useMemo(() => {
+    return ingredients.reduce((sum, i) => sum + (i.currentStock * i.costPerUnit), 0);
+  }, [ingredients]);
+
+  const recentMovements = useMemo(() => {
+    return [...movements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
+  }, [movements]);
+
   const handleScanConfirm = (data: any) => {
     setShowScanner(false);
     const newTx: Transaction = {
