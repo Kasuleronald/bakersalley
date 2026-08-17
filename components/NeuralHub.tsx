@@ -140,6 +140,91 @@ const NeuralHub: React.FC<NeuralHubProps> = ({
     }
   };
 
+  const handleInventoryCommand = async (command: string) => {
+    setIsInventoryProcessing(true);
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const context = `Low-stock ingredients: ${JSON.stringify(lowStockIngredients.slice(0, 15).map(i => ({ name: i.name, currentStock: i.currentStock, reorderLevel: i.reorderLevel, unit: i.unit })))}`;
+      const prompt = `Act as an inventory controller for a commercial bakery. CONTEXT: ${context}. QUESTION: "${command}". Give concise, actionable advice.`;
+      const response = await ai.models.generateContent({ model: 'gemini-3-flash-preview', contents: prompt });
+      setInventoryResponse(response.text || "Processed.");
+    } catch (e) {
+      setInventoryResponse("Audit failure.");
+    } finally {
+      setIsInventoryProcessing(false);
+    }
+  };
+
+  const handleDocumentSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setImportError(null);
+    setImportPreview(null);
+    setImportFileName(file.name);
+    setIsImporting(true);
+
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      let rows: any[] | null = null;
+
+      if (ext === 'pdf') {
+        const base64 = await readFileAsBase64(file);
+        rows = await analyzeImportedDocument({ pdfBase64: base64 });
+      } else if (ext === 'csv' || ext === 'xlsx' || ext === 'xls') {
+        const csvText = await readSpreadsheetAsText(file);
+        rows = await analyzeImportedDocument({ csvText });
+      } else {
+        setImportError('Unsupported file type. Please upload a .xlsx, .csv, or .pdf file.');
+        setIsImporting(false);
+        return;
+      }
+
+      if (!rows || rows.length === 0) {
+        setImportError('No ingredient/stock data could be extracted from this document.');
+      } else {
+        setImportPreview(rows.map(r => ({
+          name: String(r.name || 'Unnamed Item'),
+          unit: String(r.unit || 'kg'),
+          costPerUnit: Number(r.costPerUnit) || 0,
+          currentStock: Number(r.currentStock) || 0,
+          reorderLevel: Number(r.reorderLevel) || 0,
+          category: String(r.category || 'Food'),
+        })));
+      }
+    } catch (err) {
+      setImportError('Failed to analyze this document. Please try again.');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleConfirmImport = () => {
+    if (!importPreview || importPreview.length === 0) return;
+    const newIngredients: Ingredient[] = importPreview.map((row, i) => ({
+      id: `ing-import-${Date.now()}-${i}`,
+      name: row.name,
+      unit: row.unit as any,
+      costPerUnit: row.costPerUnit,
+      currentStock: row.currentStock,
+      reorderLevel: row.reorderLevel,
+      category: row.category,
+      storageRequirement: 'Dry/Dark',
+      batches: [],
+    }));
+    setIngredients([...ingredients, ...newIngredients]);
+    setInventoryResponse(`✅ Imported ${newIngredients.length} ingredient(s) from ${importFileName}.`);
+    setImportPreview(null);
+    setImportFileName(null);
+  };
+
+  const handleCancelImport = () => {
+    setImportPreview(null);
+    setImportFileName(null);
+    setImportError(null);
+  };
+
   return (
     <div className="space-y-8 animate-fadeIn pb-20">
       {showScanner && <AIScanner docType={scanDocType} onConfirm={handleScanConfirm} onClose={() => setShowScanner(false)} />}
