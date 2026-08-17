@@ -1,0 +1,6 @@
+{
+    "DEPLOYPATH" : "/home/scholars/public_html/bakers/",
+    "task" : [
+        "bakery_api.php"
+    ]
+}
