@@ -182,16 +182,27 @@ function normalize_multitenant_db($db) {
     return $db;
 }
 
-function call_gemini_proxy($apiKey, $model, $prompt, $systemInstruction = '', $responseMimeType = '') {
+function call_gemini_proxy($apiKey, $model, $prompt, $systemInstruction = '', $responseMimeType = '', $fileData = null) {
     if (!$apiKey) {
         return ["ok" => false, "status" => 500, "error" => "GEMINI_API_KEY is not configured on server"];
     }
 
     $url = "https://generativelanguage.googleapis.com/v1beta/models/" . rawurlencode($model) . ":generateContent?key=" . rawurlencode($apiKey);
 
+    $parts = [];
+    if (is_array($fileData) && !empty($fileData['mimeType']) && !empty($fileData['data'])) {
+        $parts[] = [
+            "inline_data" => [
+                "mime_type" => (string)$fileData['mimeType'],
+                "data" => (string)$fileData['data'],
+            ]
+        ];
+    }
+    $parts[] = ["text" => $prompt];
+
     $payload = [
         "contents" => [[
-            "parts" => [["text" => $prompt]]
+            "parts" => $parts
         ]]
     ];
 
