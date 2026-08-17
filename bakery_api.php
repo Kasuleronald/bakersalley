@@ -524,7 +524,7 @@ switch($action) {
         $raw_input = file_get_contents('php://input');
         $input = json_decode($raw_input, true);
         $prompt = trim((string)($input['prompt'] ?? ''));
-        $model = trim((string)($input['model'] ?? 'gemini-2.0-flash'));
+        $model = trim((string)($input['model'] ?? 'gemini-3-flash-preview'));
         $responseMimeType = trim((string)($input['responseMimeType'] ?? ''));
         $systemInstruction = trim((string)($input['systemInstruction'] ?? ''));
 
