@@ -148,6 +148,58 @@ const NeuralHub: React.FC<NeuralHubProps> = ({
         <ModuleAiInteraction title="Neural Control Pad" theme="indigo" isLoading={isProcessing} onExecute={handleNeuralCommand} suggestions={["Predict stock depletion", "Log 500k cash sales", "Forecast cash in 10 days"]} response={aiResponse} />
       )}
 
+      {activeMode === 'VisionIntake' && (
+        <div className="space-y-10 animate-fadeIn">
+          <div className="bg-emerald-950 p-10 rounded-[4rem] text-white shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full translate-x-32 -translate-y-32 blur-3xl"></div>
+            <div className="relative z-10 space-y-4">
+              <h3 className="text-3xl font-bold font-serif text-emerald-100">Neural Vision Lens</h3>
+              <p className="text-emerald-200 text-lg max-w-xl">
+                Photograph paper receipts, supplier invoices, or handwritten production cards — AI transcribes them straight into your transaction ledger, flagged for review.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {(['Receipt', 'Invoice', 'Production Log'] as const).map(docType => (
+              <button
+                key={docType}
+                onClick={() => { setScanDocType(docType); setShowScanner(true); }}
+                className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm text-center hover:border-emerald-500 hover:shadow-lg transition-all group"
+              >
+                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
+                  {docType === 'Receipt' ? '🧾' : docType === 'Invoice' ? '📄' : '🏭'}
+                </div>
+                <div className="font-black text-sm uppercase tracking-wide text-slate-900">Scan {docType}</div>
+                <div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-2">Start Capture →</div>
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-white p-10 rounded-[4rem] border border-slate-100 shadow-sm">
+            <h4 className="text-xl font-bold font-serif text-slate-900 mb-6">Recent Vision Activity</h4>
+            {scanHistory.length === 0 ? (
+              <p className="text-sm text-slate-400 italic">No scans yet. Capture a document above to get started.</p>
+            ) : (
+              <div className="space-y-4">
+                {scanHistory.map(scan => (
+                  <div key={scan.id} className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                    <div className="space-y-1">
+                      <div className="font-bold text-sm text-slate-900">{scan.title}</div>
+                      <div className="text-xs text-slate-400 italic">{scan.original}</div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-[10px] font-black text-slate-400 uppercase">{scan.confidence}% Confidence</span>
+                      <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full uppercase">{scan.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {activeMode === 'Edge' && (
         <div className="space-y-10 animate-fadeIn">
            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
