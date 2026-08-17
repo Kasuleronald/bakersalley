@@ -16,7 +16,11 @@ interface CloudConfig {
 class ApiClient {
   private getCloudConfig(): CloudConfig | null {
     const saved = localStorage.getItem(CONFIG_KEY);
-    return saved ? JSON.parse(saved) : null;
+    if (saved) return JSON.parse(saved);
+
+    // No cloud config saved yet (fresh install) — default to the backend co-hosted on this
+    // same origin, since ExportManager's Cloud Sync setup screen is only reachable post-login.
+    return { url: `${window.location.origin}/bakery_api.php`, key: '', enabled: true };
   }
 
   private getToken(): string | null {
