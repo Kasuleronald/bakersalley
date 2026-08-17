@@ -590,6 +590,41 @@ export const analyzeDocumentImage = async (base64: string, docType: string): Pro
   });
 };
 
+/**
+ * Extracts ingredient/stock-style records from an uploaded document (spreadsheet CSV text or a
+ * PDF's raw bytes). Never applies anything itself — callers must show the returned rows to the
+ * user for confirmation before writing them into state.
+ */
+export const analyzeImportedDocument = async (params: { csvText?: string; pdfBase64?: string }): Promise<any[] | null> => {
+  return executeWithRetry(async (ai) => {
+    const instruction = `You are a data-entry specialist for a commercial bakery ERP system.
+Extract a list of INGREDIENT / STOCK ITEM records from the provided document (a supplier price list, stock count sheet, or similar).
+For each distinct item found, return an object with: name (string), unit (e.g. "kg", "litres", "pieces", "bags"), costPerUnit (number), currentStock (number), reorderLevel (number), category (string, e.g. "Food", "Packaging").
+If a field genuinely isn't present in the document, use a sensible default (unit: "kg", costPerUnit: 0, currentStock: 0, reorderLevel: 0, category: "Food") rather than omitting the item.
+Return STRICTLY a JSON array of these objects, nothing else — no prose, no markdown fences.`;
+
+    const contents = params.pdfBase64
+      ? {
+          parts: [
+            { inlineData: { mimeType: 'application/pdf', data: params.pdfBase64 } },
+            { text: instruction }
+          ]
+        }
+      : `${instruction}\n\nDOCUMENT DATA (CSV):\n${params.csvText || ''}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents,
+      config: { responseMimeType: "application/json" }
+    });
+
+    const parsed = JSON.parse(response.text || '[]');
+    if (Array.isArray(parsed)) return parsed;
+    if (Array.isArray(parsed?.items)) return parsed.items;
+    return [];
+  });
+};
+
 export const generateIndustryBlueprint = async (description: string, nation: string): Promise<any | null> => {
   return executeWithRetry(async (ai) => {
     const prompt = `Generate industry blueprint. Return JSON.`;
