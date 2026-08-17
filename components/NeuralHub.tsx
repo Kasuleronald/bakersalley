@@ -307,6 +307,139 @@ const NeuralHub: React.FC<NeuralHubProps> = ({
         </div>
       )}
 
+      {activeMode === 'InventoryNexus' && (
+        <div className="space-y-10 animate-fadeIn">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm text-center">
+              <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Ingredients Tracked</div>
+              <div className="text-4xl font-mono font-black text-indigo-900">{ingredients.length}</div>
+            </div>
+            <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm text-center">
+              <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Low Stock Alerts</div>
+              <div className={`text-4xl font-mono font-black ${lowStockIngredients.length > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{lowStockIngredients.length}</div>
+            </div>
+            <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm text-center">
+              <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Inventory Value</div>
+              <div className="text-4xl font-mono font-black text-indigo-900">{currency.formatCompact(inventoryValue)}</div>
+            </div>
+          </div>
+
+          <ModuleAiInteraction
+            title="Inventory Neural Audit"
+            theme="amber"
+            isLoading={isInventoryProcessing}
+            onExecute={handleInventoryCommand}
+            suggestions={["Which ingredients need reordering now?", "Estimate this week's flour requirement", "Flag ingredients at risk of stockout"]}
+            response={inventoryResponse}
+          />
+
+          <div className="bg-white p-10 rounded-[4rem] border border-slate-100 shadow-sm space-y-6">
+            <div>
+              <h4 className="text-xl font-bold font-serif text-slate-900">Document Import</h4>
+              <p className="text-xs text-slate-400 mt-1">
+                Upload a supplier price list or stock sheet (.xlsx, .csv, or .pdf) — AI extracts the ingredient records. Nothing is added to your inventory until you review and confirm below.
+              </p>
+            </div>
+
+            {!importPreview && (
+              <label className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-200 rounded-[2.5rem] p-10 cursor-pointer hover:border-amber-400 hover:bg-amber-50/30 transition-all">
+                <span className="text-4xl">{isImporting ? '⏳' : '📤'}</span>
+                <span className="text-xs font-black uppercase text-slate-500 tracking-wide">
+                  {isImporting ? `Analyzing ${importFileName}...` : 'Click to upload a document'}
+                </span>
+                <input type="file" accept=".xlsx,.xls,.csv,.pdf" className="hidden" onChange={handleDocumentSelected} disabled={isImporting} />
+              </label>
+            )}
+
+            {importError && (
+              <p className="text-xs font-bold text-rose-600">{importError}</p>
+            )}
+
+            {importPreview && (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <h5 className="text-sm font-black uppercase text-slate-700">
+                    Review before import — {importPreview.length} item{importPreview.length === 1 ? '' : 's'} found
+                  </h5>
+                  <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Confirmation Required</span>
+                </div>
+                <div className="overflow-x-auto rounded-3xl border border-slate-100">
+                  <table className="w-full text-xs">
+                    <thead className="bg-slate-50 text-slate-400 uppercase text-[9px] font-black">
+                      <tr>
+                        <th className="p-3 text-left">Name</th>
+                        <th className="p-3 text-left">Unit</th>
+                        <th className="p-3 text-right">Cost/Unit</th>
+                        <th className="p-3 text-right">Stock</th>
+                        <th className="p-3 text-right">Reorder Level</th>
+                        <th className="p-3 text-left">Category</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importPreview.map((row, i) => (
+                        <tr key={i} className="border-t border-slate-100">
+                          <td className="p-3 font-bold">{row.name}</td>
+                          <td className="p-3">{row.unit}</td>
+                          <td className="p-3 text-right font-mono">{currency.format(row.costPerUnit)}</td>
+                          <td className="p-3 text-right font-mono">{row.currentStock}</td>
+                          <td className="p-3 text-right font-mono">{row.reorderLevel}</td>
+                          <td className="p-3">{row.category}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex gap-4">
+                  <button onClick={handleCancelImport} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase text-[10px]">Cancel</button>
+                  <button onClick={handleConfirmImport} className="flex-[2] py-4 bg-amber-600 text-white rounded-2xl font-black uppercase text-[10px] shadow-xl hover:bg-amber-700 transition-all">
+                    Confirm Import ({importPreview.length} item{importPreview.length === 1 ? '' : 's'})
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white p-10 rounded-[4rem] border border-slate-100 shadow-sm">
+            <h4 className="text-xl font-bold font-serif text-slate-900 mb-6">Low Stock Ingredients</h4>
+            {lowStockIngredients.length === 0 ? (
+              <p className="text-sm text-slate-400 italic">All ingredients are above their reorder level.</p>
+            ) : (
+              <div className="space-y-3">
+                {lowStockIngredients.slice(0, 8).map(ing => (
+                  <div key={ing.id} className="flex items-center justify-between p-5 bg-rose-50/50 rounded-2xl border border-rose-100">
+                    <div>
+                      <div className="font-bold text-sm text-slate-900">{ing.name}</div>
+                      <div className="text-[10px] font-black text-slate-400 uppercase">{ing.category}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-mono font-black text-rose-600">{ing.currentStock} {ing.unit}</div>
+                      <div className="text-[10px] font-black text-slate-400 uppercase">Reorder at {ing.reorderLevel} {ing.unit}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {recentMovements.length > 0 && (
+            <div className="bg-white p-10 rounded-[4rem] border border-slate-100 shadow-sm">
+              <h4 className="text-xl font-bold font-serif text-slate-900 mb-6">Recent Inventory Movements</h4>
+              <div className="space-y-3">
+                {recentMovements.map(m => (
+                  <div key={m.id} className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                      <div className="font-bold text-sm text-slate-900">{m.type}</div>
+                      <div className="text-[10px] font-black text-slate-400 uppercase">{new Date(m.date).toLocaleDateString()}{m.destination ? ` • ${m.destination}` : ''}</div>
+                    </div>
+                    <div className="font-mono font-black text-slate-700">{m.quantity}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {activeMode === 'Edge' && (
         <div className="space-y-10 animate-fadeIn">
            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
