@@ -40,6 +40,7 @@ const NeuralHub: React.FC<NeuralHubProps> = ({
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [revenueShock, setRevenueShock] = useState(0);
   const [showScanner, setShowScanner] = useState(false);
+  const [scanDocType, setScanDocType] = useState<'Receipt' | 'Invoice' | 'Production Log'>('Receipt');
   const [scanHistory, setScanHistory] = useState(MOCK_SCAN_HISTORY);
   const [edgeSensors, setEdgeSensors] = useState<SensorData[]>([]);
 
