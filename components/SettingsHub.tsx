@@ -33,6 +33,53 @@ const SettingsHub: React.FC<SettingsHubProps> = ({
   const [isArchitectLoading, setIsArchitectLoading] = useState(false);
   const [customIndustryDesc, setCustomIndustryDesc] = useState('');
 
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordStatus, setPasswordStatus] = useState<{ type: 'idle' | 'saving' | 'success' | 'error'; message?: string }>({ type: 'idle' });
+
+  const [isResettingData, setIsResettingData] = useState(false);
+  const [resetStatus, setResetStatus] = useState<{ type: 'idle' | 'success' | 'error'; message?: string }>({ type: 'idle' });
+
+  const isAdminRole = ['Platform Admin', 'Admin', 'Managing Director'].includes(currentUser.role);
+
+  const handleChangePassword = async () => {
+    if (newPassword.length < 8) {
+      setPasswordStatus({ type: 'error', message: 'New password must be at least 8 characters.' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordStatus({ type: 'error', message: 'New password and confirmation do not match.' });
+      return;
+    }
+
+    setPasswordStatus({ type: 'saving' });
+    const result = await apiClient.changePassword(currentPassword, newPassword);
+    if (result.status === 'success') {
+      setPasswordStatus({ type: 'success', message: 'Password updated successfully.' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } else {
+      setPasswordStatus({ type: 'error', message: result.message || 'Failed to update password.' });
+    }
+  };
+
+  const handleResetTenantData = async () => {
+    if (!window.confirm('This permanently clears all ingredients, SKUs, sales, transactions, employees, outlets and other business records for this tenant. This cannot be undone. Continue?')) {
+      return;
+    }
+    setIsResettingData(true);
+    setResetStatus({ type: 'idle' });
+    const result = await apiClient.resetTenantData();
+    setIsResettingData(false);
+    if (result.status === 'success') {
+      setResetStatus({ type: 'success', message: 'Business data cleared. Reload the app to see a clean workspace.' });
+    } else {
+      setResetStatus({ type: 'error', message: result.message || 'Failed to clear data.' });
+    }
+  };
+
   const handleSave = () => {
     setIsSaving(true);
     setTimeout(() => {
