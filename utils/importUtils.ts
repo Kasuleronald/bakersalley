@@ -1,4 +1,27 @@
+import * as XLSX from 'xlsx';
 import { Ingredient, Unit, Activity, FinishedGood, Supplier } from '../types';
+
+/**
+ * Reads an uploaded spreadsheet (.xlsx/.xls/.csv) and returns its first sheet as CSV text,
+ * suitable for either the existing column-mapped parsers above or free-form AI interpretation.
+ */
+export const readSpreadsheetAsText = async (file: File): Promise<string> => {
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer, { type: 'array' });
+  const firstSheetName = workbook.SheetNames[0];
+  if (!firstSheetName) return '';
+  return XLSX.utils.sheet_to_csv(workbook.Sheets[firstSheetName]);
+};
+
+/** Reads a file (e.g. a PDF) as base64, stripped of the data: URL prefix. */
+export const readFileAsBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(',')[1] || '');
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 
 export const parseIngredientCSV = (csvText: string): Partial<Ingredient>[] => {
   const lines = csvText.split(/\r?\n/);
