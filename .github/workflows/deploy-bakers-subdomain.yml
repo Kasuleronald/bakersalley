@@ -30,7 +30,3 @@ jobs:
           password: ${{ secrets.BAKERS_FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: ./
-          exclude: |
-            **/bakery_api.php
-            **/.htaccess
-            **/.deploy.json
