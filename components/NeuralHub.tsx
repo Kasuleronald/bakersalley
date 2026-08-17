@@ -112,7 +112,7 @@ const NeuralHub: React.FC<NeuralHubProps> = ({
 
   return (
     <div className="space-y-8 animate-fadeIn pb-20">
-      {showScanner && <AIScanner docType="Invoice" onConfirm={handleScanConfirm} onClose={() => setShowScanner(false)} />}
+      {showScanner && <AIScanner docType={scanDocType} onConfirm={handleScanConfirm} onClose={() => setShowScanner(false)} />}
       
       <header className="bg-slate-950 p-10 rounded-[4rem] text-white shadow-2xl relative overflow-hidden border-l-8 border-indigo-500">
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full translate-x-32 -translate-y-32 blur-3xl"></div>
