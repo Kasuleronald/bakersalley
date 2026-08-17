@@ -190,7 +190,7 @@ const FloatingAssistant: React.FC = () => {
   return (
     <div className="fixed bottom-6 right-6 z-[1000] flex flex-col items-end">
       {isOpen && (
-        <div className="w-[380px] h-[600px] bg-white/95 backdrop-blur-xl border border-coffee-100 rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-softFade mb-4 ring-1 ring-black/5">
+        <div className="w-[380px] h-[600px] max-h-[calc(100vh-7rem)] bg-white/95 backdrop-blur-xl border border-coffee-100 rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-softFade mb-4 ring-1 ring-black/5">
           {/* Header */}
           <div className="bg-coffee-900 p-6 text-white flex justify-between items-center shrink-0">
             <div className="flex items-center gap-3">
