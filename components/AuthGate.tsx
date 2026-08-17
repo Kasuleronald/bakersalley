@@ -53,13 +53,16 @@ const AuthGate: React.FC<AuthGateProps> = ({ session, onLogin, users, organizati
 
       if (auth?.user && auth?.token) {
         onLogin(auth.user, auth.token);
-      } else {
+      } else if (import.meta.env.DEV) {
+        // DEV ONLY: lets you exercise the UI without a running backend. Dead-code-eliminated
+        // from production builds since import.meta.env.DEV is statically `false` there.
         const matched = users.find(u => u.identity === identity && u.passwordHash === password);
         if (matched) {
           onLogin(matched, 'local-fallback');
           return;
         }
-
+        setError("Invalid username or password.");
+      } else {
         setError("Invalid username or password.");
       }
     } else if (view === 'Register') {

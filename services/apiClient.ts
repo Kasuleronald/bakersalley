@@ -5,7 +5,7 @@ import { User } from '../types';
 const STORAGE_KEY = 'bakemaster_pro_secure_v2';
 const CONFIG_KEY = 'bakemaster_cloud_config';
 const AUTH_KEY = 'bakemaster_session_token';
-const ENCRYPTION_KEY = 'BAKERY_LOCAL_ENCRYPTION_PASS_8821'; // Should ideally be unique per user device
+const DEVICE_KEY_STORAGE = 'bakemaster_device_key';
 
 interface CloudConfig {
   url: string;
@@ -31,13 +31,27 @@ class ApiClient {
     sessionStorage.removeItem(AUTH_KEY);
   }
 
+  // NOTE: this key necessarily lives in the same browser as the ciphertext it protects, so it
+  // cannot defend against anyone with access to this device/profile — it only ensures the cache
+  // isn't decryptable using a key baked into the public source (as a single shared key would be).
+  private getEncryptionKey(): string {
+    let deviceKey = localStorage.getItem(DEVICE_KEY_STORAGE);
+    if (!deviceKey) {
+      deviceKey = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+      localStorage.setItem(DEVICE_KEY_STORAGE, deviceKey);
+    }
+    return deviceKey;
+  }
+
   private encryptData(data: any): string {
-    return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
+    return CryptoJS.AES.encrypt(JSON.stringify(data), this.getEncryptionKey()).toString();
   }
 
   private decryptData(ciphertext: string): any {
     try {
-      const bytes = CryptoJS.AES.decrypt(ciphertext, ENCRYPTION_KEY);
+      const bytes = CryptoJS.AES.decrypt(ciphertext, this.getEncryptionKey());
       const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
       return JSON.parse(decryptedData);
     } catch (e) {

@@ -5,6 +5,8 @@ import process from 'node:process';
 const cwd = process.cwd();
 const remote = process.env.AUTO_SYNC_REMOTE || 'origin';
 const debounceMs = Number(process.env.AUTO_SYNC_DEBOUNCE_MS || 8000);
+// Pushing is opt-in: local checkpoints should be reviewed and tested before they ever reach the remote.
+const pushEnabled = process.env.AUTO_SYNC_PUSH === 'true';
 
 const runGit = (args, allowFail = false) => {
   const res = spawnSync('git', args, { cwd, encoding: 'utf8' });
@@ -71,8 +73,12 @@ const syncOnce = () => {
       throw new Error(commitRes.stderr || commitRes.stdout || 'auto-commit failed');
     }
 
-    runGit(['push', remote, branch]);
-    console.log(`[auto-sync] pushed to ${remote}/${branch} at ${nowStamp()}`);
+    console.log(`[auto-sync] committed local checkpoint at ${nowStamp()}`);
+
+    if (pushEnabled) {
+      runGit(['push', remote, branch]);
+      console.log(`[auto-sync] pushed to ${remote}/${branch} at ${nowStamp()}`);
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[auto-sync] ${message}`);
@@ -91,7 +97,7 @@ const scheduleSync = () => {
 };
 
 console.log(`[auto-sync] watching ${cwd}`);
-console.log(`[auto-sync] remote=${remote} branch=${branch} debounce=${debounceMs}ms`);
+console.log(`[auto-sync] remote=${remote} branch=${branch} debounce=${debounceMs}ms push=${pushEnabled ? 'enabled' : 'disabled (local commits only)'}`);
 
 watch(
   cwd,

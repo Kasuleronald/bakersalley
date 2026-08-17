@@ -9,7 +9,7 @@ import {
   QALog, RMQALog, SalesAgent, TaxConfig, BoardDirective, EnergyCategory, Lead, DefectCategory, BusinessProfile, Organization
 } from './types';
 import { 
-  INITIAL_USERS, INITIAL_EMPLOYEES, INITIAL_INGREDIENTS, INITIAL_SKUS, 
+  INITIAL_USERS, DEV_SEED_USERS, INITIAL_EMPLOYEES, INITIAL_INGREDIENTS, INITIAL_SKUS,
   INITIAL_OUTLETS, INITIAL_CUSTOMERS, INITIAL_ASSETS, INITIAL_TRANSACTIONS, 
   INITIAL_SALES, INITIAL_PRODUCTION_LOGS, INITIAL_FINISHED_GOODS, 
   INITIAL_OUTLET_STOCKS, INITIAL_INVENTORY_LOSSES, INITIAL_ORDERS, 
@@ -47,15 +47,6 @@ import AdminConsole from './components/AdminConsole';
 import { bakeryService } from './services/bakeryService';
 import { apiClient } from './services/apiClient';
 import { hasTabAccess } from './utils/accessControl';
-
-const ensurePlatformAdminSeed = (loadedUsers: User[] = []): User[] => {
-  const platformAdminSeed = INITIAL_USERS.find(user => user.role === 'Platform Admin');
-  if (!platformAdminSeed) return loadedUsers;
-  if (loadedUsers.some(user => user.identity === platformAdminSeed.identity)) {
-    return loadedUsers;
-  }
-  return [platformAdminSeed, ...loadedUsers];
-};
 
 const App: React.FC = () => {
 
@@ -159,7 +150,7 @@ const App: React.FC = () => {
   const [accountGroups, setAccountGroups] = useState<AccountGroup[]>(INITIAL_ACCOUNT_GROUPS);
   const [wbTickets, setWbTickets] = useState<WeighbridgeTicket[]>([]);
   const [gatePasses, setGatePasses] = useState<GatePass[]>([]);
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
+  const [users, setUsers] = useState<User[]>(import.meta.env.DEV ? DEV_SEED_USERS : INITIAL_USERS);
   const [agents, setAgents] = useState<SalesAgent[]>(INITIAL_AGENTS);
   const [directives, setBoardDirectives] = useState<BoardDirective[]>([]);
   const [qaLogs, setQaLogs] = useState<QALog[]>([]);
@@ -216,7 +207,15 @@ const App: React.FC = () => {
         if (db.accountGroups) setAccountGroups(db.accountGroups);
         if (db.wbTickets) setWbTickets(db.wbTickets);
         if (db.gatePasses) setGatePasses(db.gatePasses);
-        if (db.users) setUsers(ensurePlatformAdminSeed(db.users));
+        if (db.users) {
+          if (import.meta.env.DEV) {
+            const seedAdmin = DEV_SEED_USERS.find(u => u.role === 'Platform Admin');
+            const hasSeedAdmin = seedAdmin && db.users.some((u: User) => u.identity === seedAdmin.identity);
+            setUsers(hasSeedAdmin || !seedAdmin ? db.users : [seedAdmin, ...db.users]);
+          } else {
+            setUsers(db.users);
+          }
+        }
         if (db.agents) setAgents(db.agents);
         if (db.directives) setBoardDirectives(db.directives);
         if (db.qaLogs) setQaLogs(db.qaLogs);

@@ -18,7 +18,7 @@
 	}
 
 	html {
-		font-family: 'DM Sans', Arial, sans-serif;
+		font-family: 'Work Sans', Arial, sans-serif;
 		background: var(--app-bg);
 	}
 
@@ -70,7 +70,7 @@
 	}
 
 	.app-title {
-		font-family: 'Fraunces', Georgia, serif;
+		font-family: 'Petrona', Georgia, serif;
 		letter-spacing: -0.03em;
 		color: var(--app-ink);
 	}

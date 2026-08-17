@@ -53,7 +53,16 @@ export const DEPARTMENTS: DepartmentName[] = [
   'Board of Directors'
 ];
 
-export const INITIAL_USERS: User[] = [
+// No default users are seeded client-side in production. The first Admin account must be
+// created via the backend's BAKERY_BOOTSTRAP_ADMIN_PASSWORD environment variable (see
+// bakery_api.php), and all subsequent accounts via the real login/registration API.
+export const INITIAL_USERS: User[] = [];
+
+// DEV ONLY — local accounts for interacting with the UI without a running backend.
+// Referenced only behind `import.meta.env.DEV` checks (App.tsx, AuthGate.tsx), which Vite
+// statically replaces with `false` in production builds, so this array is dead-code-eliminated
+// out of anything built with `npm run build`. Never reference this outside a DEV check.
+export const DEV_SEED_USERS: User[] = [
   { id: 'u-platform-admin', name: 'Local Platform Admin', identity: 'platform.admin@local.dev', passwordHash: 'admin1234', orgId: 'org-default', department: 'SuperAdmin', role: 'Platform Admin', authorityLimit: 9999999999, mfaEnabled: true, hasConsentedToPrivacy: true, seenFeatures: [], systemVersion: '0.0.0' },
   { id: 'u-md', name: 'Dr. David Kato', identity: 'md@nissi-industries.com', passwordHash: 'md123', orgId: 'org-default', department: 'Administration', role: 'Managing Director', authorityLimit: 1000000000, mfaEnabled: true, hasConsentedToPrivacy: true, seenFeatures: [], systemVersion: '0.0.0' },
   { id: 'u-ops', name: 'Sarah Nabukeera', identity: 'ops@nissi-industries.com', passwordHash: 'ops123', orgId: 'org-default', department: 'Production', role: 'Plant Manager', authorityLimit: 50000000, mfaEnabled: true, hasConsentedToPrivacy: true, seenFeatures: [], systemVersion: '0.0.0' }

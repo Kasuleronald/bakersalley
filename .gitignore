@@ -1,1 +1,11 @@
 node_modules
+dist
+
+# Local secrets / environment files — never auto-commit these
+.env
+.env.*
+*.local
+
+# PHP backend runtime data (contains password hashes and tenant data)
+bakery_ledger_master.json
+bakersalley_login_rate_limit.json

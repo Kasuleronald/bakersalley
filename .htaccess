@@ -1,0 +1,6 @@
+# Defense-in-depth for Apache hosts running bakery_api.php from this directory.
+# Prefer setting BAKERY_DATA_FILE / BAKERY_RATE_LIMIT_FILE (see bakery_api.php) to a path
+# outside the webroot entirely — this file only helps if that data still ends up here.
+<FilesMatch "^(bakery_ledger_master\.json|bakersalley_login_rate_limit\.json)$">
+  Require all denied
+</FilesMatch>

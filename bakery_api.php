@@ -6,9 +6,6 @@
  * Features: env-based secrets, allowlist CORS, login rate limiting, RBAC interlocks.
  */
 
-$DATA_FILE = "bakery_ledger_master.json";
-$RATE_LIMIT_FILE = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "bakersalley_login_rate_limit.json";
-
 function env_or_default($key, $default = null) {
     $value = getenv($key);
     if ($value === false || $value === '') return $default;
@@ -237,6 +234,12 @@ function call_gemini_proxy($apiKey, $model, $prompt, $systemInstruction = '', $r
 
 apply_cors();
 
+// Defaults to the webroot for backward compatibility, but should be pointed (via BAKERY_DATA_FILE)
+// at a directory outside the webroot in production — see the accompanying .htaccess for a
+// same-directory fallback on Apache hosts.
+$DATA_FILE = env_or_default('BAKERY_DATA_FILE', __DIR__ . DIRECTORY_SEPARATOR . "bakery_ledger_master.json");
+$RATE_LIMIT_FILE = env_or_default('BAKERY_RATE_LIMIT_FILE', sys_get_temp_dir() . DIRECTORY_SEPARATOR . "bakersalley_login_rate_limit.json");
+
 $TOKEN_SECRET = env_or_default('BAKERY_TOKEN_SECRET', null);
 if (!$TOKEN_SECRET || strlen($TOKEN_SECRET) < 32) {
     json_response(500, [
@@ -260,7 +263,7 @@ function verify_token($token, $secret) {
     if (count($parts) !== 2) return false;
     $payload = json_decode(base64_decode($parts[0]), true);
     $signature = $parts[1];
-    if (hash_hmac('sha256', $parts[0], $secret) !== $signature) return false;
+    if (!hash_equals(hash_hmac('sha256', $parts[0], $secret), $signature)) return false;
     if (isset($payload['exp']) && $payload['exp'] < time()) return false;
     return $payload;
 }
@@ -451,6 +454,16 @@ switch($action) {
             json_response(400, ["status" => "error", "message" => "Prompt is required"]);
         }
 
+        $allowedModels = [
+            'gemini-2.0-flash',
+            'gemini-3-pro-preview',
+            'gemini-3-flash-preview',
+            'gemini-3-pro-image-preview',
+        ];
+        if (!in_array($model, $allowedModels, true)) {
+            json_response(400, ["status" => "error", "message" => "Unsupported model"]);
+        }
+
         $aiResult = call_gemini_proxy($GEMINI_API_KEY, $model, $prompt, $systemInstruction, $responseMimeType);
         if (!$aiResult['ok']) {
             json_response($aiResult['status'], ["status" => "error", "message" => $aiResult['error']]);
@@ -475,7 +488,10 @@ switch($action) {
         $responseData = $tenantData;
 
         if (in_array($token_payload['role'], ['Platform Admin', 'Admin', 'Managing Director'])) {
-            $responseData['users'] = $db['users'];
+            $responseData['users'] = array_map(function($u) {
+                unset($u['passwordHash']);
+                return $u;
+            }, $db['users']);
             $responseData['organizations'] = $db['organizations'];
         } else {
             $responseData['organizations'] = array_values(array_filter(
@@ -515,7 +531,25 @@ switch($action) {
 
             if (in_array($token_payload['role'], ['Admin', 'Managing Director', 'Platform Admin'])) {
                 if (isset($data_to_save['users']) && is_array($data_to_save['users'])) {
-                    $db['users'] = $data_to_save['users'];
+                    // The 'read' action never returns passwordHash to the client, so incoming user
+                    // records for known ids never carry a real hash. Preserve the server's existing
+                    // hash for those; only brand-new ids (created via the admin console) may set one.
+                    $existingById = [];
+                    foreach ($db['users'] as $existingUser) {
+                        if (isset($existingUser['id'])) {
+                            $existingById[$existingUser['id']] = $existingUser;
+                        }
+                    }
+                    $mergedUsers = [];
+                    foreach ($data_to_save['users'] as $incomingUser) {
+                        if (!is_array($incomingUser)) continue;
+                        $id = $incomingUser['id'] ?? null;
+                        if ($id !== null && isset($existingById[$id])) {
+                            $incomingUser['passwordHash'] = $existingById[$id]['passwordHash'] ?? null;
+                        }
+                        $mergedUsers[] = $incomingUser;
+                    }
+                    $db['users'] = $mergedUsers;
                 }
                 if (isset($data_to_save['organizations']) && is_array($data_to_save['organizations'])) {
                     $db['organizations'] = $data_to_save['organizations'];
